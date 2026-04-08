@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HRMS Dashboard</title>
+
+  <!-- Removed importmap to avoid conflicts with npm packages. Vite handles module resolution. -->
+  <style>
+    @keyframes fade-in-down {
+      from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .animate-fade-in-down {
+      animation: fade-in-down 0.2s ease-out forwards;
+      transform-origin: top right;
+    }
+
+    input[type="checkbox"]:checked~.dot {
+      transform: translateX(1.5rem);
+      background-color: #0891b2;
+      /* A shade of cyan */
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
+</html>

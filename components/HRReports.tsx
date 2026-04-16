@@ -166,10 +166,10 @@ const HRReports: React.FC = () => {
         if (!reportResult || !activeReport) return null;
 
         return (
-            <div className="mt-8 space-y-8 animate-fade-in">
-                <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-cyan-500">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">{activeReport.name} - Results</h3>
-                    <p className="text-sm text-gray-500 mb-6">Generated on: {new Date().toLocaleString()}</p>
+            <div className="mt-8 space-y-8 animate-fade-in relative z-10">
+                <div className="glass-card shadow-2xl rounded-[2rem] border border-white/5 border-l-4 border-l-cyan-500 p-8 lg:p-12">
+                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">{activeReport.name} - Sequence Results</h3>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-8">Generated Temporal Sync: {new Date().toLocaleString()}</p>
 
                     {Object.keys(reportResult).map((key) => {
                         const data = reportResult[key];
@@ -179,24 +179,27 @@ const HRReports: React.FC = () => {
                         const headers = Object.keys(data[0]);
 
                         return (
-                            <div key={key} className="mb-8">
-                                <h4 className="text-lg font-semibold text-gray-700 mb-3 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</h4>
-                                <div className="overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-gray-200">
-                                        <thead className="bg-gray-50">
+                            <div key={key} className="mb-10 last:mb-0">
+                                <h4 className="text-[12px] font-black text-cyan-400 mb-4 uppercase tracking-widest flex items-center gap-3">
+                                    <span className="w-6 h-[1px] bg-cyan-500/50"></span>
+                                    {key.replace(/([A-Z])/g, ' $1').trim()}
+                                </h4>
+                                <div className="border border-white/5 rounded-2xl overflow-x-auto custom-scrollbar">
+                                    <table className="min-w-full text-left border-collapse">
+                                        <thead className="bg-white/5">
                                             <tr>
                                                 {headers.map(header => (
-                                                    <th key={header} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    <th key={header} className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap border-b border-white/5">
                                                         {header.replace(/_/g, ' ')}
                                                     </th>
                                                 ))}
                                             </tr>
                                         </thead>
-                                        <tbody className="bg-white divide-y divide-gray-200">
+                                        <tbody className="divide-y divide-white/5 bg-black/20">
                                             {data.map((row: any, idx: number) => (
-                                                <tr key={idx}>
+                                                <tr key={idx} className="hover:bg-white/5 transition-colors">
                                                     {headers.map(header => (
-                                                        <td key={`${idx}-${header}`} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        <td key={`${idx}-${header}`} className="px-6 py-4 whitespace-nowrap text-xs font-bold text-slate-300">
                                                             {typeof row[header] === 'object' ? JSON.stringify(row[header]) : row[header]}
                                                         </td>
                                                     ))}
@@ -210,14 +213,15 @@ const HRReports: React.FC = () => {
                     })}
 
                     {/* Handle Non-Array Data (Summaries) */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
                         {Object.keys(reportResult).map(key => {
                             const value = reportResult[key];
                             if (key === 'generatedAt' || Array.isArray(value) || typeof value === 'object') return null;
                             return (
-                                <div key={key} className="bg-gray-50 p-4 rounded-lg">
-                                    <p className="text-sm text-gray-500 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
-                                    <p className="text-xl font-bold text-gray-900">{value}</p>
+                                <div key={key} className="bg-white/5 border border-white/10 p-6 rounded-2xl relative overflow-hidden group">
+                                     <div className="absolute inset-0 bg-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                    <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest relative z-10">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
+                                    <p className="text-2xl font-black text-white mt-2 relative z-10 truncate">{value}</p>
                                 </div>
                             )
                         })}
@@ -341,10 +345,11 @@ const HRReports: React.FC = () => {
             </div>
 
             {filteredReports.length === 0 && (
-                <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-                    <ReportsIcon className="w-24 h-24 mx-auto text-gray-300 mb-4" />
-                    <h3 className="text-xl font-bold text-gray-700 mb-2">No Reports Found</h3>
-                    <p className="text-gray-500">No reports match the selected category</p>
+                <div className="glass-card border border-white/5 rounded-3xl shadow-lg p-16 text-center animate-fade-in relative overflow-hidden">
+                     <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 blur-[50px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+                    <ReportsIcon className="w-24 h-24 mx-auto text-slate-700/50 mb-6" />
+                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Null Sector</h3>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">No intelligence assets match the selected archive parameters.</p>
                 </div>
             )}
 

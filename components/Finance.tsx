@@ -234,58 +234,65 @@ const PayrollModal: React.FC<{
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4" onClick={onClose}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
-                <div className="p-6 border-b">
-                    <h3 className="text-2xl font-bold text-[#0f3443]">{record ? 'Edit Payroll' : 'Generate Payroll'}</h3>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex justify-center items-center p-4" onClick={onClose}>
+            <div className="glass-card border border-white/10 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in" onClick={(e) => e.stopPropagation()}>
+                <div className="p-8 border-b border-white/5 bg-white/5">
+                    <h3 className="text-2xl font-black text-white tracking-tight">{record ? 'Update Fiscal Entry' : 'Generate Fiscal Entry'}</h3>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Economic Flow Initialization</p>
                 </div>
                 <form onSubmit={handleSubmit}>
-                    <div className="p-6 grid grid-cols-1 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-[#0f3443]/90 mb-1">Employee</label>
-                            <select name="employeeId" value={formData.employeeId} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md" required>
-                                <option value="">Select Employee</option>
-                                {employees.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+                    <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                        <div className="space-y-2">
+                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Target Node</label>
+                            <select name="employeeId" value={formData.employeeId} onChange={handleChange} className="w-full bg-white/5 border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all cursor-pointer font-bold" required>
+                                <option value="" className="bg-[#0f172a]">Select Node</option>
+                                {employees.map(e => <option key={e.id} value={e.id} className="bg-[#0f172a]">{e.name}</option>)}
                             </select>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-[#0f3443]/90 mb-1">Month</label>
-                            <input type="month" name="month" value={formData.month} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md" required />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-[#0f3443]/90 mb-1">Basic Salary (FRw)</label>
-                            <input type="number" name="basicSalary" value={formData.basicSalary} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md" required />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-[#0f3443]/90 mb-1">Allowances (FRw)</label>
-                            <input type="number" name="allowances" value={formData.allowances} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-[#0f3443]/90 mb-1">Deductions (FRw)</label>
-                            <input type="number" name="deductions" value={formData.deductions} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md" />
-                        </div>
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                            <label className="block text-sm font-medium text-[#0f3443]/90 mb-1">Net Salary</label>
-                            <p className="text-2xl font-bold text-green-600">{formatRWF(formData.netSalary)}</p>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-[#0f3443]/90 mb-1">Status</label>
-                            <select name="status" value={formData.status} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md">
-                                <option value="Draft">Draft</option>
-                                <option value="Processed">Processed</option>
-                                <option value="Paid">Paid</option>
-                            </select>
-                        </div>
-                        {formData.status === 'Paid' && (
-                            <div>
-                                <label className="block text-sm font-medium text-[#0f3443]/90 mb-1">Payment Date</label>
-                                <input type="date" name="paymentDate" value={formData.paymentDate} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md" />
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fiscal Cycle</label>
+                                <input type="month" name="month" value={formData.month} onChange={handleChange} className="w-full bg-white/5 border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all cursor-pointer font-bold" required />
                             </div>
-                        )}
+                            <div className="space-y-2">
+                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Base Matrix (RWF)</label>
+                                <input type="number" name="basicSalary" value={formData.basicSalary} onChange={handleChange} className="w-full bg-white/5 border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all font-bold" required />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Subsidies (RWF)</label>
+                                <input type="number" name="allowances" value={formData.allowances} onChange={handleChange} className="w-full bg-white/5 border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all font-bold" />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Levies (RWF)</label>
+                                <input type="number" name="deductions" value={formData.deductions} onChange={handleChange} className="w-full bg-white/5 border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all font-bold" />
+                            </div>
+                        </div>
+                        <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
+                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Calculated Net Yield</label>
+                            <p className="text-3xl font-black text-cyan-400 tracking-tighter">{formatRWF(formData.netSalary)}</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Protocol Status</label>
+                                <select name="status" value={formData.status} onChange={handleChange} className="w-full bg-white/5 border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all cursor-pointer font-bold">
+                                    <option value="Draft" className="bg-[#0f172a]">Draft</option>
+                                    <option value="Processed" className="bg-[#0f172a]">Processed</option>
+                                    <option value="Paid" className="bg-[#0f172a]">Paid</option>
+                                </select>
+                            </div>
+                            {formData.status === 'Paid' && (
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Liquidation Date</label>
+                                    <input type="date" name="paymentDate" value={formData.paymentDate} onChange={handleChange} className="w-full bg-white/5 border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all cursor-pointer font-bold" />
+                                </div>
+                            )}
+                        </div>
                     </div>
-                    <div className="p-6 bg-gray-50 rounded-b-xl flex justify-end gap-3">
-                        <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 text-[#0f3443] rounded-md hover:bg-gray-300 font-semibold">Cancel</button>
-                        <button type="submit" className="px-4 py-2 bg-[#0f3443] text-white rounded-md hover:bg-[#1a5a73] font-semibold">Save</button>
+                    <div className="p-8 bg-black/20 flex justify-end gap-5">
+                        <button type="button" onClick={onClose} className="px-6 py-3 bg-white/5 text-slate-300 rounded-xl hover:bg-white/10 transition-all font-bold text-sm">Dismiss</button>
+                        <button type="submit" className="px-8 py-3 executive-gradient text-black font-black rounded-xl hover:scale-105 active:scale-95 transition-all text-sm shadow-[0_0_20px_rgba(34,211,238,0.2)]">Execute Transaction</button>
                     </div>
                 </form>
             </div>

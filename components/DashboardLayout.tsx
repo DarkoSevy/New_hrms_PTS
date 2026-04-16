@@ -47,7 +47,11 @@ import {
     DocumentCheckIcon,
     DocumentDuplicateIcon,
     DocumentIcon,
+    MoonIcon,
+    SunIcon,
 } from './icons';
+import { StatusBadge } from './ui/StatusBadge';
+import { TacticalButton } from './ui/TacticalButton';
 import CreateUser from './CreateUser';
 import ResetPasswords from './ResetPasswords';
 import Recruitment from './Recruitment';
@@ -377,11 +381,6 @@ const EmployeeManagement: React.FC<{
         if (event.target) event.target.value = '';
     };
 
-    const statusMap = {
-        [EmployeeStatus.Active]: { text: 'text-green-800', bg: 'bg-green-100', dot: 'bg-green-500' },
-        [EmployeeStatus.OnLeave]: { text: 'text-yellow-800', bg: 'bg-yellow-100', dot: 'bg-yellow-500' },
-        [EmployeeStatus.Terminated]: { text: 'text-red-800', bg: 'bg-red-100', dot: 'bg-red-500' },
-    };
 
     return (
         <>
@@ -392,20 +391,18 @@ const EmployeeManagement: React.FC<{
                         <p className="text-[10px] text-slate-500 font-extrabold uppercase tracking-[0.2em] mt-1">High-fidelity Personnel Management</p>
                     </div>
                     <div className="flex gap-4">
-                        <button
+                        <TacticalButton
                             onClick={handleDownloadTemplate}
-                            className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest border border-white/10 transition-all"
+                            icon={<DownloadIcon className="w-4 h-4" />}
                         >
-                            <DownloadIcon className="w-4 h-4" />
                             Template
-                        </button>
-                        <button
+                        </TacticalButton>
+                        <TacticalButton
                             onClick={() => fileInputRef.current?.click()}
-                            className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest border border-white/10 transition-all"
+                            icon={<PlusIcon className="w-4 h-4" />}
                         >
-                            <PlusIcon className="w-4 h-4" />
                             Import
-                        </button>
+                        </TacticalButton>
                         <input
                             ref={fileInputRef}
                             type="file"
@@ -413,13 +410,13 @@ const EmployeeManagement: React.FC<{
                             onChange={handleFileUpload}
                             className="hidden"
                         />
-                        <button
+                        <TacticalButton
+                            variant="primary"
                             onClick={handleOpenAddModal}
-                            className="flex items-center gap-2 executive-gradient text-black px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all"
+                            icon={<PlusIcon className="w-4 h-4" />}
                         >
-                            <PlusIcon className="w-4 h-4" />
                             Enroll Node
-                        </button>
+                        </TacticalButton>
                     </div>
                 </div>
                 <div className="p-6 border-b border-white/5 flex gap-3">
@@ -462,10 +459,7 @@ const EmployeeManagement: React.FC<{
                                     <td className="p-6 text-xs text-slate-500">{emp.department}</td>
                                     <td className="p-6 text-[10px] font-black text-cyan-400 uppercase tracking-tight">{emp.role}</td>
                                     <td className="p-6">
-                                        <span className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-white/5 ${emp.status === EmployeeStatus.Active ? 'bg-emerald-500/10 text-emerald-400' : emp.status === EmployeeStatus.OnLeave ? 'bg-amber-500/10 text-amber-400' : 'bg-rose-500/10 text-rose-400'}`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full ${emp.status === EmployeeStatus.Active ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]' : emp.status === EmployeeStatus.OnLeave ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]' : 'bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.5)]'}`}></span>
-                                            {emp.status}
-                                        </span>
+                                        <StatusBadge status={emp.status} />
                                     </td>
                                     <td className="p-6">
                                         <div className="flex items-center gap-4">
@@ -1253,29 +1247,39 @@ const AssignPermissions: React.FC<{ roles: SystemRoleDefinition[], setRoles: Rea
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-sm text-[#0f3443]">
-            <div className="p-4 border-b">
-                <h2 className="text-xl font-bold text-[#0f3443]">Roles & Permissions</h2>
+        <div className="glass-card shadow-2xl rounded-[2rem] border border-white/5 overflow-hidden animate-fade-in relative h-full flex flex-col">
+             <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/5 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+            <div className="p-8 lg:p-12 border-b border-white/5 relative z-10 shrink-0">
+                <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Clearance Matrix</h2>
+                <p className="text-[10px] text-slate-500 font-extrabold uppercase tracking-[0.2em] mt-2">Manage nodal sector operational capabilities</p>
             </div>
-            <div className="p-4 space-y-6">
+            <div className="p-8 lg:p-12 space-y-10 relative z-10 flex-1 overflow-y-auto custom-scrollbar">
                 {roles.map(role => (
-                    <div key={role.id} className="border rounded-lg p-4">
-                        <h3 className="text-lg font-bold">{role.name}</h3>
-                        <p className="text-sm text-gray-600 mb-4">{role.description}</p>
-                        <div className="space-y-4">
+                    <div key={role.id} className="bg-white/5 border border-white/10 rounded-3xl p-8 hover:border-cyan-500/20 transition-all group">
+                        <div className="mb-8 border-b border-white/5 pb-6">
+                             <h3 className="text-xl font-black text-white uppercase tracking-tighter group-hover:text-cyan-400 transition-colors">{role.name}</h3>
+                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2">{role.description}</p>
+                        </div>
+                        <div className="space-y-8">
                             {ALL_PERMISSIONS.map(category => (
                                 <div key={category.category}>
-                                    <h4 className="font-semibold text-md mb-2">{category.category}</h4>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <h4 className="text-[10px] font-black text-cyan-500 uppercase tracking-widest mb-4 flex items-center gap-3">
+                                         <span className="w-8 h-[1px] bg-cyan-500/30"></span>
+                                         {category.category}
+                                    </h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                         {category.permissions.map(perm => (
-                                            <label key={perm.key} className="flex items-center space-x-2">
+                                            <label key={perm.key} className="flex items-center gap-3 p-3 rounded-xl bg-black/20 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all cursor-pointer group/label">
+                                                <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${role.permissions.includes(perm.key) ? 'bg-cyan-500 border-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.5)]' : 'border-white/10 bg-black/40'}`}>
+                                                    {role.permissions.includes(perm.key) && <div className="w-2.5 h-2.5 bg-[#020617] rounded-sm"></div>}
+                                                </div>
                                                 <input
                                                     type="checkbox"
-                                                    className="h-4 w-4 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"
+                                                    className="sr-only"
                                                     checked={role.permissions.includes(perm.key)}
                                                     onChange={(e) => handlePermissionChange(role.id, perm.key, e.target.checked)}
                                                 />
-                                                <span className="text-sm text-gray-700">{perm.label}</span>
+                                                <span className="text-[10px] font-black text-slate-400 group-hover/label:text-white uppercase tracking-tight transition-colors">{perm.label}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -1815,20 +1819,17 @@ interface SidebarMenuItemProps {
 const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({ icon, text, isActive, onClick, isSubItem }) => (
     <button
         onClick={onClick}
-        className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-300 group relative ${isActive
-                ? 'bg-cyan-500 text-black shadow-[0_0_30px_rgba(34,211,238,0.3)] scale-[1.02]'
+        className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-300 group relative ${isActive
+                ? 'bg-cyan-500 text-black shadow-[0_0_20px_rgba(34,211,238,0.25)]'
                 : 'text-slate-500 hover:text-white hover:bg-white/5'
-            } ${isSubItem ? 'pl-14 py-3' : ''}`}
+            } ${isSubItem ? 'pl-8 py-1.5' : ''}`}
     >
-        <div className={`transition-all duration-500 ${isActive ? 'scale-110' : 'group-hover:scale-110 group-hover:text-cyan-400'}`}>
+        <div className={`flex-shrink-0 transition-all duration-300 ${isActive ? '' : 'group-hover:text-cyan-400'}`}>
             {icon}
         </div>
-        <span className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap text-left truncate ${isActive ? 'tracking-[0.25em]' : 'group-hover:translate-x-1'}`}>
+        <span className={`text-[9px] font-black uppercase tracking-widest transition-all duration-300 whitespace-nowrap text-left truncate leading-none`}>
             {text}
         </span>
-        {isActive && !isSubItem && (
-            <div className="absolute right-4 w-1.5 h-1.5 rounded-full bg-black shadow-[0_0_10px_rgba(0,0,0,0.5)]"></div>
-        )}
     </button>
 );
 
@@ -1844,16 +1845,16 @@ const SidebarMenuItemCollapsible: React.FC<SidebarMenuItemCollapsibleProps> = ({
     <div>
         <button
             onClick={onToggle}
-            className="w-full flex items-center justify-between text-left px-4 py-3 rounded-xl text-slate-400 hover:bg-white/5 hover:text-white transition-all duration-300 group"
+            className="w-full flex items-center justify-between text-left px-3 py-2 rounded-xl text-slate-400 hover:bg-white/5 hover:text-white transition-all duration-300 group"
         >
-            <div className="flex items-center">
-                <span className="flex-shrink-0 group-hover:scale-110 group-hover:text-cyan-400 transition-all duration-300">{icon}</span>
-                <span className="ml-4 whitespace-nowrap font-black text-[10px] uppercase tracking-[0.2em]">{text}</span>
+            <div className="flex items-center gap-3">
+                <span className="flex-shrink-0 group-hover:text-cyan-400 transition-all duration-300">{icon}</span>
+                <span className="whitespace-nowrap font-black text-[9px] uppercase tracking-widest leading-none">{text}</span>
             </div>
-            <ChevronDownIcon className={`w-4 h-4 transition-transform duration-300 ${isOpen ? 'rotate-180 text-white' : 'text-gray-500'}`} />
+            <ChevronDownIcon className={`w-3 h-3 transition-transform duration-300 flex-shrink-0 ${isOpen ? 'rotate-180 text-cyan-400' : 'text-slate-600'}`} />
         </button>
         <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-96' : 'max-h-0'}`}>
-            <div className="pt-1 space-y-0.5">
+            <div className="pt-0.5 space-y-0.5 ml-2 border-l border-white/5 pl-2">
                 {children}
             </div>
         </div>
@@ -1998,6 +1999,19 @@ export const DashboardLayout: React.FC<{ onLogout: () => void }> = ({ onLogout }
     const [isNotificationsOpen, setNotificationsOpen] = useState(false);
     const [activePage, setActivePage] = useState<Page>(Page.Dashboard);
     const [openMenus, setOpenMenus] = useState<string[]>(['HR Management', 'User Management']);
+    
+    // Theme Toggle State Hooks
+    const [isLightTheme, setIsLightTheme] = useState(() => {
+        return document.documentElement.classList.contains('light-theme');
+    });
+
+    useEffect(() => {
+        if (isLightTheme) {
+            document.documentElement.classList.add('light-theme');
+        } else {
+            document.documentElement.classList.remove('light-theme');
+        }
+    }, [isLightTheme]);
 
     const [notifications, setNotifications] = useState<Notification[]>([
         { id: '1', icon: <LeaveIcon className="w-6 h-6 text-orange-500" />, title: "New Leave Request", description: "John Doe has requested annual leave.", timestamp: "15 minutes ago", read: false },
@@ -2121,16 +2135,16 @@ export const DashboardLayout: React.FC<{ onLogout: () => void }> = ({ onLogout }
     return (
         <div className="flex h-screen bg-[#020617] text-slate-200 font-sans selection:bg-cyan-500/30">
             {/* Sidebar */}
-            <aside className={`glass-sidebar w-80 min-h-screen transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:relative z-30 flex flex-col`}>
-                <div className="flex items-center justify-center h-24 border-b border-white/5 px-6">
-                    <img src="/assets/pts-logo-light.png" alt="PTS" className="h-16 w-auto drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
+            <aside className={`glass-sidebar w-64 min-h-screen transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:relative z-30 flex flex-col`}>
+                <div className="flex items-center justify-center h-16 border-b border-white/5 px-4">
+                    <img src="/assets/pts-logo-light.png" alt="PTS" className="h-10 w-auto drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
                 </div>
-                <nav className="flex-1 px-4 py-8 space-y-1.5 overflow-y-auto">
+                <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
                     {menuItems.map((item) => (
                         'subItems' in item ? (
                             <SidebarMenuItemCollapsible
                                 key={item.name}
-                                icon={<item.icon className="w-5 h-5" />}
+                                icon={<item.icon className="w-4 h-4" />}
                                 text={item.name}
                                 isOpen={openMenus.includes(item.name)}
                                 onToggle={() => handleToggleMenu(item.name)}
@@ -2138,7 +2152,7 @@ export const DashboardLayout: React.FC<{ onLogout: () => void }> = ({ onLogout }
                                 {item.subItems.map(subItem => (
                                     <SidebarMenuItem
                                         key={subItem.name}
-                                        icon={<subItem.icon className="w-4 h-4" />}
+                                        icon={<subItem.icon className="w-3.5 h-3.5" />}
                                         text={subItem.name}
                                         isActive={activePage === subItem.name}
                                         onClick={() => handleMenuClick(subItem.name)}
@@ -2149,7 +2163,7 @@ export const DashboardLayout: React.FC<{ onLogout: () => void }> = ({ onLogout }
                         ) : (
                             <SidebarMenuItem
                                 key={item.name}
-                                icon={<item.icon className="w-5 h-5" />}
+                                icon={<item.icon className="w-4 h-4" />}
                                 text={item.name}
                                 isActive={activePage === item.name}
                                 onClick={() => handleMenuClick(item.name as Page)}
@@ -2157,8 +2171,8 @@ export const DashboardLayout: React.FC<{ onLogout: () => void }> = ({ onLogout }
                         )
                     ))}
                 </nav>
-                <div className="px-5 py-6 border-t border-white/5">
-                    <SidebarMenuItem icon={<LogoutIcon className="w-5 h-5" />} text="Logout" isActive={false} onClick={onLogout} />
+                <div className="px-3 py-4 border-t border-white/5">
+                    <SidebarMenuItem icon={<LogoutIcon className="w-4 h-4" />} text="Logout" isActive={false} onClick={onLogout} />
                 </div>
             </aside>
 
@@ -2177,7 +2191,7 @@ export const DashboardLayout: React.FC<{ onLogout: () => void }> = ({ onLogout }
                             </button>
                             <div>
                                 <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-sm">{activePage}</h1>
-                                <p className="text-xs text-slate-500 mt-1 uppercase tracking-widest font-semibold">HR Management System</p>
+                                <p className="text-xs text-slate-500 mt-1 uppercase tracking-widest font-semibold">Tactical Operations Node</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-8">
@@ -2185,6 +2199,11 @@ export const DashboardLayout: React.FC<{ onLogout: () => void }> = ({ onLogout }
                                 <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-cyan-400 transition-colors" />
                                 <input type="text" placeholder="Quick Search..." className="pl-11 pr-4 py-2.5 w-72 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-sm transition-all hover:bg-white/10" />
                             </div>
+                            
+                            <button onClick={() => setIsLightTheme(!isLightTheme)} className="p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-xl transition-all" title="Toggle Theme">
+                                {isLightTheme ? <MoonIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5" />}
+                            </button>
+                            
                             <div className="relative" ref={notificationsRef}>
                                 <button onClick={() => setNotificationsOpen(!isNotificationsOpen)} className="relative p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all">
                                     <BellIcon className="w-6 h-6" />

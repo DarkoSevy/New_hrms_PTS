@@ -32,15 +32,15 @@ interface AuditStats {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const ACTION_COLORS: Record<string, string> = {
-    CREATE: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200',
-    UPDATE: 'bg-amber-100 text-amber-700 ring-1 ring-amber-200',
-    DELETE: 'bg-red-100 text-red-700 ring-1 ring-red-200',
-    LOGIN: 'bg-blue-100 text-blue-700 ring-1 ring-blue-200',
-    LOGOUT: 'bg-slate-100 text-slate-600 ring-1 ring-slate-200',
-    APPROVE: 'bg-cyan-100 text-cyan-700 ring-1 ring-cyan-200',
-    REJECT: 'bg-rose-100 text-rose-700 ring-1 ring-rose-200',
-    EXPORT: 'bg-violet-100 text-violet-700 ring-1 ring-violet-200',
-    VIEW: 'bg-gray-100 text-gray-600 ring-1 ring-gray-200',
+    CREATE: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(52,211,153,0.1)]',
+    UPDATE: 'bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-[0_0_10px_rgba(251,191,36,0.1)]',
+    DELETE: 'bg-rose-500/10 text-rose-400 border border-rose-500/20 shadow-[0_0_10px_rgba(244,63,94,0.1)]',
+    LOGIN: 'bg-blue-500/10 text-blue-400 border border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.1)]',
+    LOGOUT: 'bg-slate-500/10 text-slate-400 border border-slate-500/20',
+    APPROVE: 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_10px_rgba(34,211,238,0.1)]',
+    REJECT: 'bg-rose-500/10 text-rose-400 border border-rose-500/20 shadow-[0_0_10px_rgba(225,29,72,0.1)]',
+    EXPORT: 'bg-violet-500/10 text-violet-400 border border-violet-500/20 shadow-[0_0_10px_rgba(139,92,246,0.1)]',
+    VIEW: 'bg-white/5 text-slate-400 border border-white/10',
 };
 
 const SEVERITY_DOT: Record<string, string> = {
@@ -219,10 +219,8 @@ const AuditLogs: React.FC = () => {
             {/* Header */}
             <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <span className="text-2xl">🔍</span> Audit Logs
-                    </h1>
-                    <p className="text-sm text-gray-500 mt-1">Complete activity trail — every action tracked and searchable</p>
+                    <h1 className="text-4xl font-black text-white tracking-tighter uppercase">Audit Manifest</h1>
+                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mt-2">Tactical Activity & Sequence Records</p>
                 </div>
                 <div className="flex items-center gap-3">
                     {/* Auto-refresh toggle */}
@@ -251,12 +249,12 @@ const AuditLogs: React.FC = () => {
                     <button
                         onClick={() => downloadCSV(logs)}
                         disabled={logs.length === 0}
-                        className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-sm font-medium hover:bg-emerald-500/30 disabled:opacity-50 transition-all"
+                        className="flex items-center gap-2 px-6 py-3 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/20 disabled:opacity-20 transition-all shadow-[0_0_20px_rgba(52,211,153,0.1)]"
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                        Export CSV
+                        Export Intel
                     </button>
                 </div>
             </div>
@@ -352,26 +350,26 @@ const AuditLogs: React.FC = () => {
                         {uniqueEntities.map(e => <option key={e} value={e} className="bg-[#020617]">{e}</option>)}
                     </select>
 
-                    <div className="flex items-center gap-2">
-                        <label className="text-xs text-gray-500 font-medium">From:</label>
+                    <div className="flex items-center gap-4">
+                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Temporal Bound (Start):</label>
                         <input
                             id="filter-from"
                             name="filter-from"
                             type="date"
                             value={filterFrom}
                             onChange={e => setFilterFrom(e.target.value)}
-                            className="px-3 py-2 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:ring-2 focus:ring-[#0f3443] focus:border-transparent"
+                            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-slate-300 focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all cursor-pointer font-bold"
                         />
                     </div>
-                    <div className="flex items-center gap-2">
-                        <label className="text-xs text-gray-500 font-medium">To:</label>
+                    <div className="flex items-center gap-4">
+                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Temporal Bound (End):</label>
                         <input
                             id="filter-to"
                             name="filter-to"
                             type="date"
                             value={filterTo}
                             onChange={e => setFilterTo(e.target.value)}
-                            className="px-3 py-2 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:ring-2 focus:ring-[#0f3443] focus:border-transparent"
+                            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-slate-300 focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all cursor-pointer font-bold"
                         />
                     </div>
 

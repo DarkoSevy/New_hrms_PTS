@@ -7,15 +7,14 @@ import {
     PhoneIcon,
     LockClosedIcon,
     KeyIcon,
-    IdentificationIcon,
     SparklesIcon,
     ArrowPathIcon,
     EyeIcon,
     EyeSlashIcon,
     CheckCircleIcon,
-    // FIX: Import ChevronDownIcon
     ChevronDownIcon,
 } from './icons';
+import { TacticalButton } from './ui/TacticalButton';
 
 interface SystemRoleDefinition {
     id: string;
@@ -132,122 +131,201 @@ const CreateUser: React.FC<CreateUserProps> = ({ roles, onUserCreate }) => {
 
     const passwordMismatch = formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword;
 
+    // Tactical input classes
+    const inputClasses = "w-full bg-white/5 border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all placeholder:text-slate-700 font-bold";
+    const inputClassesWithIcon = "w-full bg-white/5 border border-white/10 text-white pl-12 pr-5 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all placeholder:text-slate-700 font-bold";
+    const labelClasses = "block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-2";
+
     return (
-        <div className="max-w-4xl mx-auto">
-            <div className="mb-6">
-                <h2 className="text-2xl font-bold text-[#0f3443]">Create New System User</h2>
-                <p className="text-gray-500">Fill in the details below to create a new user account.</p>
+        <div className="max-w-5xl mx-auto space-y-8 animate-fade-in pb-10">
+            <div>
+                <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Create System Node</h2>
+                <p className="text-[10px] text-slate-500 font-extrabold uppercase tracking-[0.2em] mt-2">Initialize new personnel access clearance</p>
             </div>
-            <form onSubmit={handleSubmit}>
-                <div className="bg-white rounded-xl shadow-sm">
-                    {submissionStatus === 'success' && (
-                        <div className="p-4 bg-green-50 border-l-4 border-green-400 rounded-t-xl animate-fade-in-down" role="alert">
-                            <div className="flex">
-                                <div className="flex-shrink-0">
-                                    <CheckCircleIcon className="h-5 w-5 text-green-400" />
-                                </div>
-                                <div className="ml-3">
-                                    <p className="text-sm font-medium text-green-800">User Created Successfully</p>
-                                    <p className="text-sm text-green-700">The new user account for {formData.fullName} has been created.</p>
-                                </div>
+            
+            <form onSubmit={handleSubmit} className="glass-card shadow-2xl rounded-[2rem] border border-white/5 overflow-hidden">
+                {submissionStatus === 'success' && (
+                    <div className="p-6 bg-emerald-500/10 border-b border-emerald-500/20 animate-fade-in" role="alert">
+                        <div className="flex items-center gap-4">
+                            <div className="flex-shrink-0 bg-emerald-500/20 p-2 rounded-xl">
+                                <CheckCircleIcon className="h-6 w-6 text-emerald-400" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-black text-emerald-400 uppercase tracking-widest">Node Compiled Successfully</p>
+                                <p className="text-xs font-bold text-emerald-500/70 mt-1">Access credentials generated for {formData.fullName}.</p>
                             </div>
                         </div>
-                    )}
+                    </div>
+                )}
 
-                    <div className="p-6">
-                        <h3 className="text-lg font-semibold text-[#0f3443] border-b pb-2 mb-6 flex items-center gap-2"><UserIcon className="w-5 h-5" /> User Identity</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-                            <div className="flex flex-col items-center text-center">
-                                <label className="block text-sm font-medium text-[#0f3443]/90 mb-2">Profile Picture</label>
-                                <div className="mt-1">
-                                    <span className="inline-block h-28 w-28 rounded-full overflow-hidden bg-gray-100 shadow-inner">
-                                        {avatarPreview ? <img src={avatarPreview} alt="Avatar preview" className="h-full w-full object-cover" /> : <UserIcon className="h-full w-full text-gray-300 p-5" />}
-                                    </span>
-                                    <label htmlFor="avatar-upload" className="mt-4 inline-block cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                        <span>Upload Image</span>
-                                        <input id="avatar-upload" name="avatar-upload" type="file" className="sr-only" accept="image/*" onChange={handleAvatarChange} />
-                                    </label>
+                <div className="p-8 lg:p-12 border-b border-white/5">
+                    {/* Identity Matrix */}
+                    <h3 className="text-[12px] font-black text-cyan-400 uppercase tracking-widest mb-8 flex items-center gap-3">
+                        <UserIcon className="w-5 h-5 text-cyan-500" /> 
+                        Identity Matrix
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 items-start">
+                        {/* Avatar Column */}
+                        <div className="flex flex-col items-center text-center lg:col-span-1">
+                            <label className={labelClasses}>Avatar Visual</label>
+                            <div className="relative group rounded-[2rem] p-1 border border-white/10 bg-white/5 hover:border-cyan-500/30 transition-all cursor-pointer">
+                                <div className="h-40 w-40 rounded-[1.8rem] overflow-hidden bg-black/50 shadow-inner relative">
+                                    {avatarPreview ? (
+                                        <img src={avatarPreview} alt="Avatar preview" className="h-full w-full object-cover" />
+                                    ) : (
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <UserIcon className="h-16 w-16 text-slate-600 group-hover:text-cyan-400/50 transition-colors" />
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-
-                            <div className="md:col-span-2 space-y-4">
-                                <div>
-                                    <label htmlFor="fullName" className="block text-sm font-medium text-[#0f3443]/90 mb-1">Full Name</label>
-                                    <input type="text" name="fullName" id="fullName" value={formData.fullName} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-cyan-500" required />
-                                </div>
-                                <div>
-                                    <label htmlFor="username" className="block text-sm font-medium text-[#0f3443]/90 mb-1">Username</label>
-                                    <div className="flex gap-2">
-                                        <input type="text" name="username" id="username" value={formData.username} onChange={handleChange} className="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-cyan-500" required />
-                                        <button type="button" onClick={handleSuggestUsername} disabled={isGeneratingUsername || !formData.fullName} title="Suggest with AI" className="flex items-center gap-2 px-3 py-2 bg-cyan-50 text-cyan-700 rounded-md hover:bg-cyan-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors">
-                                            {isGeneratingUsername ? <ArrowPathIcon className="w-5 h-5 animate-spin" /> : <SparklesIcon className="w-5 h-5" />}
-                                            <span className="text-sm font-semibold">Suggest</span>
-                                        </button>
-                                    </div>
-                                </div>
+                                <label htmlFor="avatar-upload" className="absolute -bottom-4 bg-[#0f172a] border border-white/10 text-white text-[10px] uppercase font-black tracking-widest px-4 py-2 rounded-lg cursor-pointer hover:bg-cyan-500/10 hover:border-cyan-500/30 transition-all shadow-xl">
+                                    Capture Image
+                                    <input id="avatar-upload" name="avatar-upload" type="file" className="sr-only" accept="image/*" onChange={handleAvatarChange} />
+                                </label>
                             </div>
                         </div>
 
-                        <h3 className="text-lg font-semibold text-[#0f3443] border-b pb-2 mb-6 mt-10 flex items-center gap-2"><LockClosedIcon className="w-5 h-5" /> Credentials & Access</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Name & Username */}
+                        <div className="lg:col-span-3 space-y-6 lg:pl-4 mt-8 lg:mt-0">
                             <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-[#0f3443]/90 mb-1">Email Address</label>
-                                <div className="relative"><span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"><EnvelopeIcon className="w-5 h-5 text-gray-400" /></span><input type="email" name="email" id="email" value={formData.email} onChange={handleChange} className="w-full pl-10 p-2 border border-gray-300 rounded-md" required /></div>
+                                <label htmlFor="fullName" className={labelClasses}>Legal Designation</label>
+                                <input type="text" name="fullName" id="fullName" value={formData.fullName} onChange={handleChange} className={inputClasses} required />
                             </div>
                             <div>
-                                <label htmlFor="phone" className="block text-sm font-medium text-[#0f3443]/90 mb-1">Phone Number <span className="text-gray-400">(Optional)</span></label>
-                                <div className="relative"><span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"><PhoneIcon className="w-5 h-5 text-gray-400" /></span><input type="tel" name="phone" id="phone" value={formData.phone} onChange={handleChange} className="w-full pl-10 p-2 border border-gray-300 rounded-md" /></div>
-                            </div>
-                            <div>
-                                <label htmlFor="password-field" className="block text-sm font-medium text-[#0f3443]/90 mb-1">Password</label>
-                                <div className="flex gap-2">
-                                    <div className="relative flex-grow">
-                                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"><LockClosedIcon className="w-5 h-5 text-gray-400" /></span>
-                                        <input type={passwordVisible ? 'text' : 'password'} name="password" id="password-field" value={formData.password} onChange={handleChange} className="w-full pl-10 p-2 border border-gray-300 rounded-md" required />
-                                        <button type="button" onClick={() => setPasswordVisible(!passwordVisible)} className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700" aria-label={passwordVisible ? 'Hide password' : 'Show password'}>{passwordVisible ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}</button>
-                                    </div>
-                                    <button type="button" onClick={handleGeneratePassword} className="px-3 py-2 text-sm font-semibold text-cyan-700 bg-cyan-50 rounded-md hover:bg-cyan-100">Generate</button>
-                                </div>
-                            </div>
-                            <div>
-                                <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#0f3443]/90 mb-1">Confirm Password</label>
-                                <div className="relative">
-                                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"><LockClosedIcon className="w-5 h-5 text-gray-400" /></span>
-                                    <input type={confirmPasswordVisible ? 'text' : 'password'} name="confirmPassword" id="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className={`w-full pl-10 p-2 border rounded-md ${passwordMismatch ? 'border-red-500' : 'border-gray-300'}`} required />
-                                    <button type="button" onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)} className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700" aria-label={confirmPasswordVisible ? 'Hide password' : 'Show password'}>{confirmPasswordVisible ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}</button>
-                                </div>
-                                {passwordMismatch && <p className="text-xs text-red-600 mt-1">Passwords do not match.</p>}
-                            </div>
-                            <div className="md:col-span-2">
-                                <label htmlFor="role" className="block text-sm font-medium text-[#0f3443]/90 mb-1">Assign Role</label>
-                                <div className="relative">
-                                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"><KeyIcon className="w-5 h-5 text-gray-400" /></span>
-                                    <select name="role" id="role" value={formData.role} onChange={handleChange} className="w-full pl-10 p-2 border border-gray-300 rounded-md appearance-none" required>
-                                        {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-                                    </select>
-                                    <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"><ChevronDownIcon className="w-5 h-5 text-gray-400" /></span>
+                                <label htmlFor="username" className={labelClasses}>System Alias</label>
+                                <div className="flex gap-3">
+                                    <input type="text" name="username" id="username" value={formData.username} onChange={handleChange} className={`${inputClasses} font-mono text-cyan-50`} required />
+                                    <button 
+                                        type="button" 
+                                        onClick={handleSuggestUsername} 
+                                        disabled={isGeneratingUsername || !formData.fullName} 
+                                        title="Suggest with AI" 
+                                        className="flex items-center gap-2 px-5 bg-white/5 text-cyan-400 border border-white/10 rounded-2xl hover:bg-cyan-500/10 hover:border-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-black text-[10px] uppercase tracking-widest"
+                                    >
+                                        {isGeneratingUsername ? <ArrowPathIcon className="w-5 h-5 animate-spin" /> : <SparklesIcon className="w-5 h-5" />}
+                                        <span className="hidden sm:inline">AI Compute</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="p-6 bg-gray-50 rounded-b-xl flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-4">
-                        <div className="flex flex-col gap-4">
-                            <div>
-                                <label htmlFor="status-toggle" className="flex items-center cursor-pointer">
-                                    <div className="relative"><input type="checkbox" id="status-toggle" className="sr-only" checked={formData.status === 'Active'} onChange={() => setFormData(prev => ({ ...prev, status: prev.status === 'Active' ? 'Inactive' : 'Active' }))} /><div className="block bg-gray-300 w-12 h-6 rounded-full"></div><div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${formData.status === 'Active' ? 'transform translate-x-6 bg-cyan-600' : ''}`}></div></div>
-                                    <div className="ml-3 text-gray-700 font-medium">Account Status: {formData.status}</div>
-                                </label>
-                            </div>
-                            <div className="relative flex items-start">
-                                <div className="flex items-center h-5"><input id="sendWelcomeEmail" name="sendWelcomeEmail" type="checkbox" checked={formData.sendWelcomeEmail} onChange={handleChange} className="focus:ring-cyan-500 h-4 w-4 text-cyan-600 border-gray-300 rounded" /></div>
-                                <div className="ml-3 text-sm"><label htmlFor="sendWelcomeEmail" className="font-medium text-gray-700">Send welcome email with credentials</label></div>
+                    {/* Access Layer */}
+                    <h3 className="text-[12px] font-black text-cyan-400 uppercase tracking-widest border-t border-white/5 pt-10 mb-8 mt-10 flex items-center gap-3">
+                        <LockClosedIcon className="w-5 h-5 text-cyan-500" /> 
+                        Clearance Matrix
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label htmlFor="email" className={labelClasses}>Comm Link (Email)</label>
+                            <div className="relative">
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                    <EnvelopeIcon className="w-5 h-5 text-white/30" />
+                                </span>
+                                <input type="email" name="email" id="email" value={formData.email} onChange={handleChange} className={inputClassesWithIcon} required />
                             </div>
                         </div>
-                        <div className="flex gap-3 self-end sm:self-center">
-                            <button type="button" onClick={handleReset} className="px-5 py-2.5 bg-gray-200 text-[#0f3443] rounded-lg hover:bg-gray-300 font-semibold transition-colors">Cancel</button>
-                            <button type="submit" className="px-5 py-2.5 bg-[#0f3443] text-white rounded-lg hover:bg-[#1a5a73] font-semibold transition-colors">Create User</button>
+                        <div>
+                            <label htmlFor="phone" className={labelClasses}>Signal Line (Phone) <span className="text-white/20 ml-2">Optional</span></label>
+                            <div className="relative">
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                    <PhoneIcon className="w-5 h-5 text-white/30" />
+                                </span>
+                                <input type="tel" name="phone" id="phone" value={formData.phone} onChange={handleChange} className={inputClassesWithIcon} />
+                            </div>
                         </div>
+                        
+                        <div>
+                            <label htmlFor="password-field" className={labelClasses}>Cipher Encryption (Pass)</label>
+                            <div className="flex gap-3">
+                                <div className="relative flex-grow">
+                                    <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                        <LockClosedIcon className="w-5 h-5 text-white/30" />
+                                    </span>
+                                    <input 
+                                        type={passwordVisible ? 'text' : 'password'} 
+                                        name="password" 
+                                        id="password-field" 
+                                        value={formData.password} 
+                                        onChange={handleChange} 
+                                        className={`${inputClassesWithIcon} font-mono`} 
+                                        required 
+                                    />
+                                    <button type="button" onClick={() => setPasswordVisible(!passwordVisible)} className="absolute inset-y-0 right-0 flex items-center pr-4 text-white/30 hover:text-cyan-400 transition-colors" aria-label={passwordVisible ? 'Hide password' : 'Show password'}>
+                                        {passwordVisible ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                                    </button>
+                                </div>
+                                <button type="button" onClick={handleGeneratePassword} className="px-5 bg-white/5 text-cyan-400 border border-white/10 rounded-2xl hover:bg-cyan-500/10 hover:border-cyan-500/30 transition-all font-black text-[10px] uppercase tracking-widest">
+                                    Auto-Gen
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label htmlFor="confirmPassword" className={labelClasses}>Verify Encryption</label>
+                            <div className="relative">
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                    <LockClosedIcon className={`w-5 h-5 ${passwordMismatch ? 'text-rose-500/50' : 'text-white/30'}`} />
+                                </span>
+                                <input 
+                                    type={confirmPasswordVisible ? 'text' : 'password'} 
+                                    name="confirmPassword" 
+                                    id="confirmPassword" 
+                                    value={formData.confirmPassword} 
+                                    onChange={handleChange} 
+                                    className={`w-full bg-white/5 border text-white pl-12 pr-5 py-3 rounded-2xl font-mono focus:outline-none transition-all ${passwordMismatch ? 'border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.1)] focus:border-rose-500' : 'border-white/10 focus:ring-2 focus:ring-cyan-500/50'}`} 
+                                    required 
+                                />
+                                <button type="button" onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)} className="absolute inset-y-0 right-0 flex items-center pr-4 text-white/30 hover:text-cyan-400 transition-colors" aria-label={confirmPasswordVisible ? 'Hide password' : 'Show password'}>
+                                    {confirmPasswordVisible ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                                </button>
+                            </div>
+                            {passwordMismatch && <p className="text-[10px] text-rose-400 font-bold tracking-widest uppercase mt-2">Ciphers do not match</p>}
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label htmlFor="role" className={labelClasses}>Operational Role Level</label>
+                            <div className="relative">
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                    <KeyIcon className="w-5 h-5 text-white/30" />
+                                </span>
+                                <select name="role" id="role" value={formData.role} onChange={handleChange} className={`${inputClassesWithIcon} appearance-none cursor-pointer`} required>
+                                    {roles.map(r => <option key={r.id} value={r.id} className="bg-[#0f172a]">{r.name}</option>)}
+                                </select>
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                                    <ChevronDownIcon className="w-5 h-5 text-white/30" />
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="p-8 bg-black/20 flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-6">
+                    <div className="flex flex-col gap-5">
+                        <div>
+                            <label htmlFor="status-toggle" className="flex items-center cursor-pointer group">
+                                <div className="relative">
+                                    <input type="checkbox" id="status-toggle" className="sr-only" checked={formData.status === 'Active'} onChange={() => setFormData(prev => ({ ...prev, status: prev.status === 'Active' ? 'Inactive' : 'Active' }))} />
+                                    <div className="block bg-white/5 border border-white/10 w-14 h-7 rounded-full shadow-inner transition-colors"></div>
+                                    <div className={`dot absolute left-[3px] top-[3px] bg-slate-400 w-5 h-5 rounded-full transition-transform ${formData.status === 'Active' ? 'transform translate-x-7 bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]' : ''}`}></div>
+                                </div>
+                                <div className="ml-4 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                                    <span className="text-slate-500">Node Status:</span>
+                                    <span className={formData.status === 'Active' ? 'text-emerald-400' : 'text-slate-400'}>{formData.status}</span>
+                                </div>
+                            </label>
+                        </div>
+                        <div className="relative flex items-center group">
+                            <input id="sendWelcomeEmail" name="sendWelcomeEmail" type="checkbox" checked={formData.sendWelcomeEmail} onChange={handleChange} className="w-5 h-5 bg-white/5 border border-white/10 rounded cursor-pointer checked:bg-cyan-500 checked:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 focus:ring-offset-0 appearance-none transition-colors" />
+                            <CheckCircleIcon className="w-3.5 h-3.5 text-black absolute left-[3px] pointer-events-none opacity-0 data-[checked=true]:opacity-100" data-checked={formData.sendWelcomeEmail} />
+                            <label htmlFor="sendWelcomeEmail" className="ml-3 text-[10px] font-black text-slate-400 uppercase tracking-widest cursor-pointer group-hover:text-white transition-colors">Dispatch auto-manifest via encrypted channels</label>
+                        </div>
+                    </div>
+                    <div className="flex gap-4 self-end sm:self-center">
+                        <TacticalButton variant="ghost" type="button" onClick={handleReset}>Abort</TacticalButton>
+                        <TacticalButton variant="primary" type="submit">Compile Node</TacticalButton>
                     </div>
                 </div>
             </form>

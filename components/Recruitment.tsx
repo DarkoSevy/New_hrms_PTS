@@ -19,6 +19,8 @@ import {
     EnvelopeIcon,
     PhoneIcon
 } from './icons';
+import { StatusBadge } from './ui/StatusBadge';
+import { TacticalButton } from './ui/TacticalButton';
 
 interface RecruitmentProps {
     vacancies: Vacancy[];
@@ -29,11 +31,6 @@ interface RecruitmentProps {
     onUpdateCandidates: (candidates: Candidate[]) => void;
 }
 
-const statusMap: { [key in VacancyStatus]: { text: string; bg: string; dot: string } } = {
-    [VacancyStatus.Open]: { text: 'text-emerald-400', bg: 'bg-emerald-500/10', dot: 'bg-emerald-400' },
-    [VacancyStatus.OnHold]: { text: 'text-orange-400', bg: 'bg-orange-500/10', dot: 'bg-orange-400' },
-    [VacancyStatus.Closed]: { text: 'text-slate-400', bg: 'bg-white/10', dot: 'bg-slate-400' },
-};
 
 const stageColors: { [key in CandidateStage]: { bg: string, border: string } } = {
     [CandidateStage.Sourced]: { bg: 'bg-blue-500/5', border: 'border-blue-500/50' },
@@ -83,41 +80,41 @@ const SearchableEmployeeDropdown: React.FC<{
 
     return (
         <div className="relative" ref={dropdownRef}>
-            <button type="button" onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center p-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-2 focus:ring-cyan-500">
+            <button type="button" onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center p-3 bg-white/5 border border-white/10 rounded-2xl text-left focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all">
                 {selectedEmployee ? (
                     <>
-                        <img src={selectedEmployee.avatarUrl} alt={selectedEmployee.name} className="w-6 h-6 rounded-full mr-2" />
-                        <span className="flex-grow">{selectedEmployee.name}</span>
+                        <img src={selectedEmployee.avatarUrl} alt={selectedEmployee.name} className="w-8 h-8 rounded-xl mr-3 border border-white/10 shadow-sm" />
+                        <span className="flex-grow font-bold text-white text-sm">{selectedEmployee.name}</span>
                     </>
                 ) : (
-                    <span className="flex-grow text-gray-500">{placeholder}</span>
+                    <span className="flex-grow text-slate-500 text-sm font-medium">{placeholder}</span>
                 )}
-                <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                <ChevronDownIcon className={`w-5 h-5 text-slate-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </button>
             {isOpen && (
-                <div className="absolute z-20 top-full mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg animate-fade-in-down">
-                    <div className="p-2">
+                <div className="absolute z-20 top-full mt-2 w-full glass-card border border-white/10 rounded-2xl shadow-2xl animate-fade-in">
+                    <div className="p-3">
                         <input
                             type="text"
-                            placeholder="Search employees..."
-                            className="w-full p-2 border border-gray-200 rounded-md"
+                            placeholder="Filter Intel..."
+                            className="w-full p-2 bg-white/5 border border-white/10 rounded-xl text-white text-xs outline-none focus:ring-1 focus:ring-cyan-500/50"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <ul className="max-h-60 overflow-y-auto">
+                    <ul className="max-h-64 overflow-y-auto p-2 space-y-1">
                         {filteredEmployees.map(employee => (
                             <li
                                 key={employee.id}
-                                className="p-2 flex items-center hover:bg-gray-100 cursor-pointer"
+                                className="p-3 flex items-center hover:bg-white/10 rounded-xl cursor-pointer transition-colors"
                                 onClick={() => {
                                     onChange(employee.id);
                                     setIsOpen(false);
                                     setSearchTerm('');
                                 }}
                             >
-                                <img src={employee.avatarUrl} alt={employee.name} className="w-6 h-6 rounded-full mr-2" />
-                                <span>{employee.name}</span>
+                                <img src={employee.avatarUrl} alt={employee.name} className="w-8 h-8 rounded-xl mr-3 border border-white/5 shadow-sm" />
+                                <span className="text-sm font-bold text-slate-200">{employee.name}</span>
                             </li>
                         ))}
                     </ul>
@@ -159,51 +156,52 @@ const VacancyModal: React.FC<{
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4" onClick={onClose}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
-                <div className="p-6 border-b">
-                    <h3 className="text-2xl font-bold text-[#0f3443]">{vacancy ? 'Edit Vacancy' : 'Create New Vacancy'}</h3>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex justify-center items-center p-4" onClick={onClose}>
+            <div className="glass-card border border-white/10 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in" onClick={(e) => e.stopPropagation()}>
+                <div className="p-8 border-b border-white/5 bg-white/5">
+                    <h3 className="text-2xl font-black text-white tracking-tight">{vacancy ? 'Update Requirement' : 'Initialize Requirement'}</h3>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Operational Deployment Specs</p>
                 </div>
                 <form onSubmit={handleSubmit}>
-                    <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 max-h-[70vh] overflow-y-auto">
+                    <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
                         <div className="space-y-2">
-                        <label htmlFor="password" className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Access Cipher</label>
-                            <input type="text" name="title" id="title" value={formData.title} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md" required/>
+                            <label htmlFor="title" className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Title Designation</label>
+                            <input type="text" name="title" id="title" value={formData.title} onChange={handleChange} className="w-full bg-white/5 border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all placeholder:text-slate-700 font-bold" required/>
                         </div>
-                        <div>
-                            <label htmlFor="department" className="block text-sm font-medium text-[#0f3443]/90 mb-1">Department</label>
-                            <input type="text" name="department" id="department" value={formData.department} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md" required/>
+                        <div className="space-y-2">
+                            <label htmlFor="department" className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Division Segment</label>
+                            <input type="text" name="department" id="department" value={formData.department} onChange={handleChange} className="w-full bg-white/5 border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all placeholder:text-slate-700 font-bold" required/>
                         </div>
-                        <div>
-                            <label htmlFor="location" className="block text-sm font-medium text-[#0f3443]/90 mb-1">Location</label>
-                            <input type="text" name="location" id="location" value={formData.location} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md" required/>
+                        <div className="space-y-2">
+                            <label htmlFor="location" className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Operational Node</label>
+                            <input type="text" name="location" id="location" value={formData.location} onChange={handleChange} className="w-full bg-white/5 border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all placeholder:text-slate-700 font-bold" required/>
                         </div>
-                        <div>
-                            <label htmlFor="employmentType" className="block text-sm font-medium text-[#0f3443]/90 mb-1">Employment Type</label>
-                            <select name="employmentType" id="employmentType" value={formData.employmentType} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md" required>
-                                <option value="Full-time">Full-time</option>
-                                <option value="Part-time">Part-time</option>
-                                <option value="Contract">Contract</option>
+                        <div className="space-y-2">
+                            <label htmlFor="employmentType" className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Contract Matrix</label>
+                            <select name="employmentType" id="employmentType" value={formData.employmentType} onChange={handleChange} className="w-full bg-white/5 border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all cursor-pointer font-bold" required>
+                                <option value="Full-time" className="bg-[#0f172a]">Full-time</option>
+                                <option value="Part-time" className="bg-[#0f172a]">Part-time</option>
+                                <option value="Contract" className="bg-[#0f172a]">Contract</option>
                             </select>
                         </div>
-                        <div>
-                            <label htmlFor="hiringManagerId" className="block text-sm font-medium text-[#0f3443]/90 mb-1">Hiring Manager</label>
+                        <div className="md:col-span-2 space-y-2">
+                            <label htmlFor="hiringManagerId" className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Node Overseer</label>
                             <SearchableEmployeeDropdown employees={employees} value={formData.hiringManagerId} onChange={(val) => setFormData(p => ({...p, hiringManagerId: val}))}/>
                         </div>
-                        <div className="md:col-span-2">
-                            <label htmlFor="description" className="block text-sm font-medium text-[#0f3443]/90 mb-1">Job Description</label>
-                            <textarea name="description" id="description" rows={4} value={formData.description} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md" required></textarea>
+                        <div className="md:col-span-2 space-y-2">
+                            <label htmlFor="description" className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Requirement Brief</label>
+                            <textarea name="description" id="description" rows={4} value={formData.description} onChange={handleChange} className="w-full bg-white/5 border border-white/10 text-white px-5 py-4 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all placeholder:text-slate-700 font-medium resize-none" required></textarea>
                         </div>
-                        <div>
-                            <label htmlFor="status" className="block text-sm font-medium text-[#0f3443]/90 mb-1">Status</label>
-                            <select name="status" id="status" value={formData.status} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md" required>
-                                {Object.values(VacancyStatus).map(s => <option key={s} value={s}>{s}</option>)}
+                        <div className="space-y-2">
+                            <label htmlFor="status" className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Protocol Status</label>
+                            <select name="status" id="status" value={formData.status} onChange={handleChange} className="w-full bg-white/5 border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all cursor-pointer font-bold" required>
+                                {Object.values(VacancyStatus).map(s => <option key={s} value={s} className="bg-[#0f172a]">{s}</option>)}
                             </select>
                         </div>
                     </div>
-                    <div className="p-6 bg-gray-50 rounded-b-xl flex justify-end gap-3">
-                        <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 text-[#0f3443] rounded-md hover:bg-gray-300 font-semibold">Cancel</button>
-                        <button type="submit" className="px-4 py-2 bg-[#0f3443] text-white rounded-md hover:bg-[#1a5a73] font-semibold">{vacancy ? 'Save Changes' : 'Create Vacancy'}</button>
+                    <div className="p-8 bg-black/20 flex justify-end gap-5">
+                        <button type="button" onClick={onClose} className="px-6 py-3 bg-white/5 text-slate-300 rounded-xl hover:bg-white/10 transition-all font-bold text-sm">Dismiss</button>
+                        <button type="submit" className="px-8 py-3 executive-gradient text-black font-black rounded-xl hover:scale-105 active:scale-95 transition-all text-sm shadow-[0_0_20px_rgba(34,211,238,0.2)]">{vacancy ? 'Confirm Specs' : 'Execute Initializer'}</button>
                     </div>
                 </form>
             </div>
@@ -238,33 +236,36 @@ const CandidateModal: React.FC<{
     };
 
     return (
-         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4" onClick={onClose}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
-                <div className="p-6 border-b">
-                    <h3 className="text-2xl font-bold text-[#0f3443]">{candidate ? 'Edit Candidate' : 'Add New Candidate'}</h3>
+         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex justify-center items-center p-4" onClick={onClose}>
+            <div className="glass-card border border-white/10 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in" onClick={(e) => e.stopPropagation()}>
+                <div className="p-8 border-b border-white/5 bg-white/5">
+                    <h3 className="text-2xl font-black text-white tracking-tight">{candidate ? 'Update Node Data' : 'Deploy New Node'}</h3>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Acquirer Acquisition Sequence</p>
                 </div>
                 <form onSubmit={handleSubmit}>
-                    <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 max-h-[70vh] overflow-y-auto">
-                        <div className="md:col-span-2">
-                            <label htmlFor="name" className="block text-sm font-medium text-[#0f3443]/90 mb-1 flex items-center gap-2"><UserIcon className="w-4 h-4 text-gray-400"/> Full Name</label>
-                            <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md" required/>
+                    <div className="p-8 space-y-6">
+                        <div className="space-y-2">
+                            <label htmlFor="name" className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">Node Alias</label>
+                            <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} className="w-full bg-white/5 border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all placeholder:text-slate-700 font-bold" required/>
                         </div>
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-[#0f3443]/90 mb-1 flex items-center gap-2"><EnvelopeIcon className="w-4 h-4 text-gray-400"/> Email</label>
-                            <input type="email" name="email" id="email" value={formData.email} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md" required/>
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label htmlFor="email" className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">Comm Link (Email)</label>
+                                <input type="email" name="email" id="email" value={formData.email} onChange={handleChange} className="w-full bg-white/5 border border-white/10 text-white px-4 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all placeholder:text-slate-700 font-bold text-xs" required/>
+                            </div>
+                            <div className="space-y-2">
+                                <label htmlFor="phone" className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">Signal Line (Phone)</label>
+                                <input type="tel" name="phone" id="phone" value={formData.phone} onChange={handleChange} className="w-full bg-white/5 border border-white/10 text-white px-4 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all placeholder:text-slate-700 font-bold text-xs" required/>
+                            </div>
                         </div>
-                        <div>
-                            <label htmlFor="phone" className="block text-sm font-medium text-[#0f3443]/90 mb-1 flex items-center gap-2"><PhoneIcon className="w-4 h-4 text-gray-400"/> Phone</label>
-                            <input type="tel" name="phone" id="phone" value={formData.phone} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md" required/>
-                        </div>
-                        <div className="md:col-span-2">
-                            <label htmlFor="resumeUrl" className="block text-sm font-medium text-[#0f3443]/90 mb-1 flex items-center gap-2"><PaperClipIcon className="w-4 h-4 text-gray-400"/> Resume URL / File</label>
-                            <input type="text" name="resumeUrl" id="resumeUrl" value={formData.resumeUrl} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md" placeholder="https://linkedin.com/in/... or upload"/>
+                        <div className="space-y-2">
+                            <label htmlFor="resumeUrl" className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">CV Archive Protocol</label>
+                            <input type="text" name="resumeUrl" id="resumeUrl" value={formData.resumeUrl} onChange={handleChange} className="w-full bg-white/5 border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none transition-all placeholder:text-slate-700 font-bold text-xs" placeholder="https://cloud.archive/cv-101"/>
                         </div>
                     </div>
-                     <div className="p-6 bg-gray-50 rounded-b-xl flex justify-end gap-3">
-                        <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 text-[#0f3443] rounded-md hover:bg-gray-300 font-semibold">Cancel</button>
-                        <button type="submit" className="px-4 py-2 bg-[#0f3443] text-white rounded-md hover:bg-[#1a5a73] font-semibold">{candidate ? 'Save Changes' : 'Add Candidate'}</button>
+                     <div className="p-8 bg-black/20 flex justify-end gap-5">
+                        <button type="button" onClick={onClose} className="px-6 py-3 bg-white/5 text-slate-300 rounded-xl hover:bg-white/10 transition-all font-bold text-sm">Dismiss</button>
+                        <button type="submit" className="px-8 py-3 executive-gradient text-black font-black rounded-xl hover:scale-105 active:scale-95 transition-all text-sm shadow-[0_0_20px_rgba(34,211,238,0.2)]">{candidate ? 'Save Sequence' : 'Deploy Node'}</button>
                     </div>
                 </form>
             </div>
@@ -438,35 +439,31 @@ const Recruitment: React.FC<RecruitmentProps> = ({ vacancies, candidates, employ
             {/* Left Panel: Vacancies List */}
             <div className="w-full md:w-1/3 lg:w-1/4 flex-shrink-0 h-full">
                 <div className="glass-card rounded-[2rem] border border-white/5 shadow-2xl h-full flex flex-col overflow-hidden">
-                    <div className="p-6 border-b border-white/5">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-black text-white uppercase tracking-tight">Openings</h2>
-                            <button onClick={() => handleOpenModal('vacancy')} className="executive-gradient text-black px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(34,211,238,0.2)]">
-                                + New
-                            </button>
+                    <div className="p-8 border-b border-white/5 bg-white/2">
+                        <div className="flex justify-between items-center mb-8">
+                            <h2 className="text-xl font-black text-white uppercase tracking-tight">Active Ops</h2>
+                            <TacticalButton variant="primary" onClick={() => handleOpenModal('vacancy')}>
+                                + Init
+                            </TacticalButton>
                         </div>
                         <div className="relative">
                             <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"/>
-                            <input type="text" placeholder="Filter Intel..." value={vacancySearchTerm} onChange={(e) => setVacancySearchTerm(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-xs text-white placeholder:text-slate-600 outline-none focus:ring-2 focus:ring-cyan-500/30 transition-all"/>
+                            <input type="text" placeholder="Filter Pipeline..." value={vacancySearchTerm} onChange={(e) => setVacancySearchTerm(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase text-white placeholder:text-slate-600 outline-none focus:ring-2 focus:ring-cyan-500/30 transition-all tracking-widest"/>
                         </div>
                     </div>
-                    <div className="overflow-y-auto">
+                    <div className="overflow-y-auto custom-scrollbar">
                         {filteredVacancies.map(vacancy => {
                             const candidateCount = candidates.filter(c => c.vacancyId === vacancy.id).length;
-                            const manager = employees.find(e => e.id === vacancy.hiringManagerId);
                             return (
                                 <button key={vacancy.id} onClick={() => setSelectedVacancyId(vacancy.id)} className={`w-full text-left p-6 border-l-4 transition-all group ${selectedVacancyId === vacancy.id ? 'bg-cyan-500/5 border-cyan-400' : 'border-transparent hover:bg-white/5'}`}>
                                     <div className="flex justify-between items-start mb-2">
                                         <h3 className="font-black text-white text-xs uppercase tracking-tight group-hover:text-cyan-400 transition-colors">{vacancy.title}</h3>
-                                        <span className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${statusMap[vacancy.status].bg} ${statusMap[vacancy.status].text} border border-white/5`}>
-                                            <span className={`w-1 h-1 rounded-full ${statusMap[vacancy.status].dot}`}></span>
-                                            {vacancy.status}
-                                        </span>
+                                        <StatusBadge status={vacancy.status} />
                                     </div>
                                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{vacancy.department}</p>
                                     <div className="mt-5 grid grid-cols-2 gap-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                                        <div className="flex items-center gap-2 opacity-60"><MapPinIcon className="w-3 h-3"/><span>{vacancy.location}</span></div>
-                                        <div className="flex items-center gap-2 opacity-60"><UserGroupIcon className="w-3 h-3"/><span>{candidateCount} Nodes</span></div>
+                                        <div className="flex items-center gap-2 opacity-60"><MapPinIcon className="w-3.5 h-3.5"/><span>{vacancy.location}</span></div>
+                                        <div className="flex items-center gap-2 opacity-60"><UserGroupIcon className="w-3.5 h-3.5"/><span>{candidateCount} Nodes</span></div>
                                     </div>
                                 </button>
                             );
@@ -478,38 +475,46 @@ const Recruitment: React.FC<RecruitmentProps> = ({ vacancies, candidates, employ
             {/* Right Panel: Kanban Board */}
             <div className="flex-1 flex flex-col min-h-0">
                 {selectedVacancy ? (
-                     <div className="glass-card rounded-3xl border border-white/5 p-8 mb-6 shadow-2xl relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/5 blur-3xl rounded-full translate-x-10 -translate-y-10"></div>
+                     <div className="glass-card rounded-[2rem] border border-white/5 p-10 mb-8 shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2"></div>
                         <div className="flex justify-between items-center relative z-10">
                             <div>
-                                <h2 className="text-3xl font-black text-white tracking-tight uppercase">{selectedVacancy.title}</h2>
-                                <p className="text-slate-500 text-xs font-black uppercase tracking-widest mt-1">{selectedVacancy.department} &middot; {selectedVacancy.location}</p>
+                                <h2 className="text-4xl font-black text-white tracking-tighter uppercase">{selectedVacancy.title}</h2>
+                                <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mt-2 flex items-center gap-3">
+                                    <span className="text-cyan-400">{selectedVacancy.department}</span>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-slate-800"></span>
+                                    <span>{selectedVacancy.location}</span>
+                                </p>
                             </div>
                             <div className="flex items-center gap-4">
-                                <button onClick={() => handleOpenModal('vacancy', selectedVacancy)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all border border-white/10"><EditIcon className="w-4 h-4"/></button>
-                                <button onClick={() => handleDeleteVacancy(selectedVacancy.id)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all border border-red-500/20"><TrashIcon className="w-4 h-4"/></button>
-                                <button onClick={() => handleOpenModal('candidate')} className="executive-gradient text-black px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(34,211,238,0.2)] ml-2">
-                                    + Add Candidate
-                                </button>
+                                <button onClick={() => handleOpenModal('vacancy', selectedVacancy)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all border border-white/10"><EditIcon className="w-5 h-5"/></button>
+                                <button onClick={() => handleDeleteVacancy(selectedVacancy.id)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition-all border border-rose-500/20"><TrashIcon className="w-5 h-5"/></button>
+                                <TacticalButton variant="primary" onClick={() => handleOpenModal('candidate')} className="ml-4">
+                                    + Recruit Node
+                                </TacticalButton>
                             </div>
                         </div>
                     </div>
                 ) : (
-                    <div className="flex-1 flex items-center justify-center bg-white rounded-xl shadow-sm text-center text-gray-500">
-                        <div>
-                            <BriefcaseIcon className="w-16 h-16 mx-auto text-gray-300" />
-                            <h3 className="mt-2 text-lg font-semibold">Select a Job Opening</h3>
-                            <p>Choose a position from the left to view the candidate pipeline.</p>
+                    <div className="flex-1 glass-card rounded-[2rem] border border-white/5 flex items-center justify-center text-center">
+                        <div className="space-y-6 animate-pulse">
+                            <div className="w-24 h-24 bg-white/5 rounded-[2rem] flex items-center justify-center mx-auto border border-white/10">
+                                <BriefcaseIcon className="w-12 h-12 text-slate-700" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-black text-slate-400 uppercase tracking-widest">Awaiting Ops Select</h3>
+                                <p className="text-slate-600 text-xs font-bold mt-2">Choose an active node from the tactical manifest</p>
+                            </div>
                         </div>
                     </div>
                 )}
                 {selectedVacancy && (
-                    <div className="flex-1 overflow-x-auto pb-4">
-                        <div className="flex gap-4 min-h-full">
+                    <div className="flex-1 overflow-x-auto pb-6 custom-scrollbar">
+                        <div className="flex gap-6 min-h-full">
                             {KANBAN_STAGES.map(stage => (
                                 <KanbanColumn key={stage} stage={stage} candidates={candidatesByStage.pipeline[stage] || []} onDragStart={handleDragStart} onDrop={handleDrop} onEditCandidate={(c) => handleOpenModal('candidate', c)} onDeleteCandidate={handleDeleteCandidate}/>
                             ))}
-                            <div className="flex-1 min-w-[280px] space-y-4">
+                            <div className="flex-1 min-w-[300px] space-y-6">
                                 {KANBAN_END_STAGES.map(stage => (
                                     <KanbanColumn key={stage} stage={stage} candidates={candidatesByStage.end[stage] || []} onDragStart={handleDragStart} onDrop={handleDrop} onEditCandidate={(c) => handleOpenModal('candidate', c)} onDeleteCandidate={handleDeleteCandidate}/>
                                 ))}

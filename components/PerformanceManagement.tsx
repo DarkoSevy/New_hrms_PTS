@@ -51,10 +51,10 @@ const PerformanceManagement: React.FC = () => {
     const allGoals: Goal[] = reviews.flatMap(r => r.goals);
 
     const ratingColors = (rating: number) => {
-        if (rating >= 4.5) return 'text-green-600';
-        if (rating >= 3.5) return 'text-blue-600';
-        if (rating >= 2.5) return 'text-orange-600';
-        return 'text-red-600';
+        if (rating >= 4.5) return 'text-emerald-400';
+        if (rating >= 3.5) return 'text-cyan-400';
+        if (rating >= 2.5) return 'text-amber-400';
+        return 'text-rose-400';
     };
 
     const statusColors = {
@@ -88,7 +88,7 @@ const PerformanceManagement: React.FC = () => {
     };
 
     return (
-        <div className="p-6">
+        <div className="space-y-8 animate-fade-in pb-10">
             <div className="mb-8">
                 <h2 className="text-3xl font-black text-white tracking-tight uppercase">Performance Architecture</h2>
                 <p className="text-slate-500 text-sm font-medium mt-1 tracking-widest uppercase">Intelligent Growth & KPI Tracking</p>
@@ -177,8 +177,27 @@ const PerformanceManagement: React.FC = () => {
                 </div>
             </div>
 
+            {/* Loading State */}
+            {loading && (
+                <div className="glass-card rounded-3xl border border-white/5 p-24 text-center animate-fade-in">
+                    <div className="flex flex-col items-center gap-6">
+                        <div className="w-16 h-16 rounded-full border-4 border-cyan-500/20 border-t-cyan-500 animate-spin"></div>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Synchronizing Performance Matrix...</p>
+                    </div>
+                </div>
+            )}
+
             {/* Reviews Tab */}
-            {selectedTab === 'reviews' && (
+            {!loading && selectedTab === 'reviews' && reviews.length === 0 && (
+                <div className="glass-card rounded-3xl border border-white/5 p-24 text-center animate-fade-in relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/5 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+                    <ReportsIcon className="w-20 h-20 mx-auto text-slate-700/50 mb-6" />
+                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">No Active Calibrations</h3>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">No performance review cycles are currently registered in the system.</p>
+                </div>
+            )}
+
+            {!loading && selectedTab === 'reviews' && reviews.length > 0 && (
                 <div className="space-y-4">
                     {reviews.map((review) => (
                         <div key={review.id} className="glass-card rounded-2xl border border-white/5 p-8 shadow-2xl hover:border-white/10 transition-all">
@@ -258,7 +277,7 @@ const PerformanceManagement: React.FC = () => {
             )}
 
             {/* Goals Tab */}
-            {selectedTab === 'goals' && (
+            {!loading && selectedTab === 'goals' && (
                 <div className="glass-card rounded-2xl border border-white/5 overflow-hidden shadow-2xl">
                     <div className="overflow-x-auto">
                         <table className="w-full">
@@ -271,7 +290,7 @@ const PerformanceManagement: React.FC = () => {
                                     <th className="px-6 py-5 text-left">Deadline</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200">
+                            <tbody className="divide-y divide-white/5">
                                 {reviews.map((review) =>
                                     review.goals.map((goal) => (
                                     <tr key={goal.id} className="hover:bg-white/5 transition-colors border-b border-white/5">

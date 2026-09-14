@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { LeaveStage, AttendanceStatus } from '@prisma/client';
+import { LeaveStage, AttendanceStatus, Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { asyncHandler } from '../middleware/asyncHandler.js';
 import { requireModule } from '../middleware/rbac.js';
+import { ownedRecordScope } from '../rbac/scope.js';
 import { startOfToday, addDays } from '../lib/dates.js';
 
 const router = Router();
@@ -11,8 +12,11 @@ router.get(
   '/',
   requireModule('dashboard', 'view'),
   asyncHandler(async (req, res) => {
+    const p = req.principal!;
     const today = startOfToday();
     const in60 = addDays(today, 60);
+    // The leave queue is individual data — scope it to what this role may see.
+    const leaveScope = ownedRecordScope(p) as Prisma.LeaveRequestWhereInput;
 
     const [
       activeCount,
@@ -52,9 +56,9 @@ router.get(
       prisma.rosterEligibility.count({ where: { isRosterable: false, employee: { isOperational: true } } }),
     ]);
 
-    // Leave queue preview (awaiting decision).
+    // Leave queue preview (awaiting decision) — scoped to the viewer's records.
     const queue = await prisma.leaveRequest.findMany({
-      where: { stage: { in: [LeaveStage.SUPERVISOR, LeaveStage.HR_VALIDATION] } },
+      where: { AND: [leaveScope, { stage: { in: [LeaveStage.SUPERVISOR, LeaveStage.HR_VALIDATION] } }] },
       take: 6,
       orderBy: { filedAt: 'asc' },
       include: { employee: { select: { fullName: true, position: { select: { title: true } }, department: { select: { name: true } } } }, leaveType: { select: { name: true } } },

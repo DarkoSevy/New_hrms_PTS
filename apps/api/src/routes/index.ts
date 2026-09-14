@@ -18,6 +18,8 @@ import schedulesRouter from './schedules.js';
 import trainingRouter from './training.js';
 import requestsRouter from './requests.js';
 import payrollRouter from './payroll.js';
+import reportsRouter from './reports.js';
+import notificationsRouter from './notifications.js';
 
 export function registerRoutes(app: Express) {
   app.use('/api/auth', authRouter);
@@ -40,4 +42,6 @@ export function registerRoutes(app: Express) {
   app.use('/api/training', authenticate, trainingRouter);
   app.use('/api/requests', authenticate, requestsRouter);
   app.use('/api/payroll', authenticate, payrollRouter);
+  app.use('/api/reports', authenticate, reportsRouter);
+  app.use('/api/notifications', authenticate, notificationsRouter);
 }

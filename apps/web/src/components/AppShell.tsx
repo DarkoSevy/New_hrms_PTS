@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthContext';
+import { NotificationsBell } from '@/components/NotificationsBell';
 import { MODULE_LABELS, NAV_ORDER, ROLE_LABELS, type ModuleKey } from '@/lib/types';
 
 const ROUTE: Record<ModuleKey, string> = {
@@ -90,6 +91,7 @@ export function AppShell() {
               <span style={{ fontSize: 12, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '.1em' }}>Signed in as</span>
               <span style={{ fontSize: 13, color: 'var(--color-ink)', fontWeight: 500 }}>{ROLE_LABELS[user.role]}</span>
             </div>
+            <NotificationsBell />
             <button
               aria-label="Account menu"
               onClick={() => setMenuOpen((v) => !v)}

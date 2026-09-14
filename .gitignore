@@ -1,31 +1,37 @@
-# Dependencies
+# dependencies
 node_modules/
-dist/
-.env
-.env.local
+.pnp
+.pnp.js
 
-# Logs
+# builds
+dist/
+build/
+*.tsbuildinfo
+
+# env
+.env
+.env.*
+!.env.example
+
+# prisma
+apps/api/prisma/*.db
+apps/api/prisma/*.db-journal
+
+# uploads (runtime file storage)
+apps/api/uploads/*
+!apps/api/uploads/.gitkeep
+
+# logs
+logs/
 *.log
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-server_log*.txt
 
-# IDE
-.vscode/
+# editor / os
+.DS_Store
 .idea/
+.vscode/
 *.swp
-*.swo
 
-# Database
-backend/database.sqlite
-*.sqlite
-
-# Temporaries/Scratch
-update_salaries.*
-diag_db.*
-check_payroll.*
-test-*.js
-verify-*.js
-check-*.js
-error-log*.txt
+# test / coverage
+coverage/
+.nyc_output/

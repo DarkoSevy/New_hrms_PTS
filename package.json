@@ -1,0 +1,25 @@
+{
+  "name": "pts-hrms",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PTS.rw HR Management System — transport & tourism workforce HR platform",
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev -w @pts/api\" \"npm run dev -w @pts/web\"",
+    "build": "npm run build -w @pts/api && npm run build -w @pts/web",
+    "db:migrate": "npm run db:migrate -w @pts/api",
+    "db:seed": "npm run db:seed -w @pts/api",
+    "db:reset": "npm run db:reset -w @pts/api",
+    "test": "npm run test -w @pts/api",
+    "lint": "npm run lint -w @pts/api && npm run lint -w @pts/web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

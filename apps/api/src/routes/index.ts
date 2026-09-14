@@ -1,0 +1,25 @@
+import type { Express } from 'express';
+import { authenticate } from '../middleware/auth.js';
+import authRouter from './auth.js';
+import referenceRouter from './reference.js';
+import employeesRouter from './employees.js';
+import departmentsRouter from './departments.js';
+import positionsRouter from './positions.js';
+import usersRouter from './users.js';
+import auditRouter from './audit.js';
+import settingsRouter from './settings.js';
+import dashboardRouter from './dashboard.js';
+
+export function registerRoutes(app: Express) {
+  app.use('/api/auth', authRouter);
+
+  // Everything below requires authentication.
+  app.use('/api/reference', authenticate, referenceRouter);
+  app.use('/api/employees', authenticate, employeesRouter);
+  app.use('/api/departments', authenticate, departmentsRouter);
+  app.use('/api/positions', authenticate, positionsRouter);
+  app.use('/api/users', authenticate, usersRouter);
+  app.use('/api/audit', authenticate, auditRouter);
+  app.use('/api/settings', authenticate, settingsRouter);
+  app.use('/api/dashboard', authenticate, dashboardRouter);
+}

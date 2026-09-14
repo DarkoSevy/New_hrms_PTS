@@ -1,0 +1,182 @@
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+   PTS.rw design tokens — extracted verbatim from the design handoff
+   (PTS HRMS.dc.html). Colours, type scale, radii and spacing.
+--------------------------------------------------------------------------- */
+@theme {
+  --font-sans: 'Outfit', system-ui, sans-serif;
+
+  /* Core palette */
+  --color-ink: #1c1b18; /* primary text + dark surfaces */
+  --color-ink-soft: #2b2a26;
+  --color-cream: #f7f3e6; /* text on dark */
+  --color-cream-2: #f7f0d8;
+  --color-accent: #efc94c; /* PTS gold */
+  --color-accent-strong: #e8b923;
+  --color-accent-deep: #c9a227;
+
+  /* Muted greys */
+  --color-muted: #57544b;
+  --color-muted-2: #45423b;
+  --color-muted-3: #4f4c44;
+  --color-muted-4: #5b584f;
+
+  /* Semantic */
+  --color-critical: #b4553f;
+  --color-critical-ink: #8e3f2c;
+  --color-success: #2f5d3a;
+  --color-warn-ink: #7a5e0c;
+
+  /* Surfaces */
+  --color-canvas: #eff0ec;
+
+  /* Radii */
+  --radius-card: 28px;
+  --radius-panel: 36px;
+  --radius-chip: 18px;
+  --radius-field: 16px;
+  --radius-pill: 999px;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  color: var(--color-ink);
+  background: linear-gradient(180deg, #a7abb4, #9298a2);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(28, 27, 24, 0.18);
+  border-radius: 8px;
+}
+
+/* Tabular numerals for figures, matching the design */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Reusable component classes (the layout patterns built once, reused)
+--------------------------------------------------------------------------- */
+@layer components {
+  .card {
+    background: rgba(255, 255, 255, 0.62);
+    border-radius: var(--radius-card);
+    padding: 24px;
+  }
+  .card-ink {
+    background: var(--color-ink);
+    color: var(--color-cream);
+    border-radius: var(--radius-card);
+    padding: 24px;
+  }
+  .eyebrow {
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .btn-accent {
+    border: none;
+    background: var(--color-accent);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+  .btn-accent:hover {
+    opacity: 0.85;
+  }
+  .btn-accent:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .btn-ghost {
+    border: 1.5px solid rgba(28, 27, 24, 0.25);
+    background: none;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
+  }
+  .btn-ghost:hover {
+    background: var(--color-ink);
+    color: #fff;
+  }
+  .btn-ghost-dark {
+    border: 1.5px solid rgba(247, 243, 230, 0.35);
+    background: none;
+    color: var(--color-cream);
+    font-family: var(--font-sans);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+  }
+  .btn-ghost-dark:hover {
+    background: rgba(247, 243, 230, 0.14);
+  }
+  .field {
+    width: 100%;
+    background: rgba(28, 27, 24, 0.06);
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-field);
+    padding: 11px 16px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    color: var(--color-ink);
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+  .field:focus {
+    border-color: rgba(28, 27, 24, 0.4);
+    background: rgba(255, 255, 255, 0.7);
+  }
+  .field-label {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-muted-4);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(28, 27, 24, 0.06) 25%,
+      rgba(28, 27, 24, 0.12) 37%,
+      rgba(28, 27, 24, 0.06) 63%
+    );
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+    border-radius: 10px;
+  }
+  @keyframes shimmer {
+    0% {
+      background-position: 100% 0;
+    }
+    100% {
+      background-position: -100% 0;
+    }
+  }
+}

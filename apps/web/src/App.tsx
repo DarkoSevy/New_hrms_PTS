@@ -7,6 +7,9 @@ import { DashboardPage } from '@/pages/DashboardPage';
 import { PeoplePage } from '@/pages/PeoplePage';
 import { ContractsPage } from '@/pages/ContractsPage';
 import { HiringPage } from '@/pages/HiringPage';
+import { LeavePage } from '@/pages/LeavePage';
+import { AttendancePage } from '@/pages/AttendancePage';
+import { SchedulesPage } from '@/pages/SchedulesPage';
 import { AdminPage } from '@/pages/AdminPage';
 import { AuditPage } from '@/pages/AuditPage';
 import { Spinner } from '@/components/ui/primitives';
@@ -48,8 +51,11 @@ export function App() {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/people" element={<Guarded module="people"><PeoplePage /></Guarded>} />
         <Route path="/people/:id" element={<Guarded module="people"><PeoplePage /></Guarded>} />
+        <Route path="/leave" element={<Guarded module="leave"><LeavePage /></Guarded>} />
         <Route path="/contracts" element={<Guarded module="contracts"><ContractsPage /></Guarded>} />
         <Route path="/hiring" element={<Guarded module="hiring"><HiringPage /></Guarded>} />
+        <Route path="/attendance" element={<Guarded module="attendance"><AttendancePage /></Guarded>} />
+        <Route path="/schedules" element={<Guarded module="schedules"><SchedulesPage /></Guarded>} />
         <Route path="/admin" element={<Guarded module="admin"><AdminPage /></Guarded>} />
         <Route path="/audit" element={<Guarded module="audit"><AuditPage /></Guarded>} />
         <Route path="*" element={<Navigate to="/" replace />} />

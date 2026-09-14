@@ -9,6 +9,9 @@ import usersRouter from './users.js';
 import auditRouter from './audit.js';
 import settingsRouter from './settings.js';
 import dashboardRouter from './dashboard.js';
+import contractsRouter from './contracts.js';
+import documentsRouter from './documents.js';
+import hiringRouter from './hiring.js';
 
 export function registerRoutes(app: Express) {
   app.use('/api/auth', authRouter);
@@ -22,4 +25,7 @@ export function registerRoutes(app: Express) {
   app.use('/api/audit', authenticate, auditRouter);
   app.use('/api/settings', authenticate, settingsRouter);
   app.use('/api/dashboard', authenticate, dashboardRouter);
+  app.use('/api/contracts', authenticate, contractsRouter);
+  app.use('/api/documents', authenticate, documentsRouter);
+  app.use('/api/hiring', authenticate, hiringRouter);
 }

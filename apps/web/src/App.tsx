@@ -11,6 +11,8 @@ import { LeavePage } from '@/pages/LeavePage';
 import { AttendancePage } from '@/pages/AttendancePage';
 import { SchedulesPage } from '@/pages/SchedulesPage';
 import { TrainingPage } from '@/pages/TrainingPage';
+import { RequestsPage } from '@/pages/RequestsPage';
+import { PayrollPage } from '@/pages/PayrollPage';
 import { AdminPage } from '@/pages/AdminPage';
 import { AuditPage } from '@/pages/AuditPage';
 import { Spinner } from '@/components/ui/primitives';
@@ -56,6 +58,8 @@ export function App() {
         <Route path="/contracts" element={<Guarded module="contracts"><ContractsPage /></Guarded>} />
         <Route path="/hiring" element={<Guarded module="hiring"><HiringPage /></Guarded>} />
         <Route path="/training" element={<Guarded module="training"><TrainingPage /></Guarded>} />
+        <Route path="/requests" element={<Guarded module="requests"><RequestsPage /></Guarded>} />
+        <Route path="/payroll" element={<Guarded module="payroll"><PayrollPage /></Guarded>} />
         <Route path="/attendance" element={<Guarded module="attendance"><AttendancePage /></Guarded>} />
         <Route path="/schedules" element={<Guarded module="schedules"><SchedulesPage /></Guarded>} />
         <Route path="/admin" element={<Guarded module="admin"><AdminPage /></Guarded>} />

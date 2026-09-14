@@ -16,6 +16,8 @@ import leaveRouter from './leave.js';
 import attendanceRouter from './attendance.js';
 import schedulesRouter from './schedules.js';
 import trainingRouter from './training.js';
+import requestsRouter from './requests.js';
+import payrollRouter from './payroll.js';
 
 export function registerRoutes(app: Express) {
   app.use('/api/auth', authRouter);
@@ -36,4 +38,6 @@ export function registerRoutes(app: Express) {
   app.use('/api/attendance', authenticate, attendanceRouter);
   app.use('/api/schedules', authenticate, schedulesRouter);
   app.use('/api/training', authenticate, trainingRouter);
+  app.use('/api/requests', authenticate, requestsRouter);
+  app.use('/api/payroll', authenticate, payrollRouter);
 }

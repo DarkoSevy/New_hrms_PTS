@@ -1,0 +1,919 @@
+// PTS.rw HR Management System — data model
+// PostgreSQL + Prisma. Configurable reference data lives in tables (not enums)
+// wherever an administrator must be able to edit it. Enums are reserved for
+// values that application logic branches on and that are not user-editable.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums — application-logic values (NOT admin-configurable)
+// ---------------------------------------------------------------------------
+
+enum Role {
+  HR_ADMINISTRATOR
+  HR_OFFICER
+  MANAGER
+  EMPLOYEE
+  SENIOR_MANAGEMENT
+}
+
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  EXPORT
+  APPROVE
+  REJECT
+  LOCK
+  ACCESS_DENIED
+}
+
+enum LeaveStage {
+  EMPLOYEE_REQUEST
+  SUPERVISOR
+  HR_VALIDATION
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum AttendanceStatus {
+  ON_DUTY
+  ON_LEAVE
+  ABSENT
+  UNEXPLAINED
+  REST_DAY
+}
+
+enum VacancyStage {
+  JOB_REQUEST
+  APPROVED
+  SCREENING
+  INTERVIEWING
+  OFFER_OUT
+  FILLED
+  CLOSED
+}
+
+enum CandidateStage {
+  APPLIED
+  SCREENING
+  INTERVIEW
+  ROAD_TEST
+  OFFER_OUT
+  HIRED
+  REJECTED
+}
+
+enum DriverGateKey {
+  LICENCE
+  TRAFFIC_RECORD
+  ROAD_TEST
+  MEDICAL_FITNESS
+  DEFENSIVE_DRIVING
+}
+
+enum OfferStatus {
+  DRAFT
+  ISSUED
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+enum RequestStatus {
+  PENDING_MANAGER
+  IN_PROGRESS
+  AWAITING_EMPLOYEE
+  RESOLVED
+  OVERDUE
+  CANCELLED
+}
+
+enum RequestPriority {
+  LOW
+  NORMAL
+  HIGH
+}
+
+enum PayrollInputState {
+  PENDING_HR
+  APPROVED
+  BLOCKED
+  LOCKED
+}
+
+enum PayrollPeriodStatus {
+  OPEN
+  LOCKED
+}
+
+enum DocumentState {
+  VALID
+  EXPIRING
+  EXPIRED
+  RESTRICTED
+  MISSING
+}
+
+enum ContractKind {
+  PERMANENT
+  FIXED_TERM
+  PROBATION
+  OPEN_ENDED
+}
+
+enum ReminderKind {
+  CONTRACT_EXPIRY
+  PROBATION_END
+}
+
+enum AppliesTo {
+  ALL
+  OPERATIONS
+  OFFICE
+  MALE
+  FEMALE
+}
+
+enum TrainingRecordState {
+  VALID
+  BOOKED
+  OVERDUE
+  EXPIRED
+  NOT_STARTED
+}
+
+enum NotificationChannel {
+  OPERATIONS
+  HR
+  MANAGER
+  FINANCE
+  EMPLOYEE
+}
+
+// ---------------------------------------------------------------------------
+// Auth & RBAC
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  isActive     Boolean  @default(true)
+  fullName     String
+  initials     String
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+  employeeId String?   @unique
+
+  refreshTokens  RefreshToken[]
+  ownedRequests  HrRequest[]    @relation("RequestOwner")
+  notifications  Notification[]
+
+  @@index([role])
+}
+
+model RefreshToken {
+  id         String    @id @default(cuid())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  replacedBy String?
+  createdByIp String?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// Append-only. A database trigger (see migration) forbids UPDATE and DELETE.
+model AuditLog {
+  id            String      @id @default(cuid())
+  actorUserId   String?
+  actorName     String
+  actorRole     Role?
+  action        AuditAction
+  entityType    String
+  entityId      String?
+  summary       String
+  previousValue Json?
+  newValue      Json?
+  ip            String?
+  userAgent     String?
+  createdAt     DateTime    @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorUserId])
+  @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Configurable reference data (admin-editable)
+// ---------------------------------------------------------------------------
+
+model Department {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  code      String   @unique
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  positions Position[]
+  employees Employee[]
+  vacancies Vacancy[]
+}
+
+model Position {
+  id            String   @id @default(cuid())
+  title         String
+  code          String   @unique
+  grade         String?
+  isOperational Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  department    Department @relation(fields: [departmentId], references: [id])
+  departmentId  String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  employees Employee[]
+  vacancies Vacancy[]
+
+  @@unique([title, departmentId])
+}
+
+model EmploymentType {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  kind      ContractKind
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employees Employee[]
+}
+
+model EmployeeStatus {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  isTerminal    Boolean  @default(false)
+  countsAsActive Boolean @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  employees Employee[]
+}
+
+model LeaveType {
+  id                        String   @id @default(cuid())
+  name                      String   @unique
+  defaultEntitlementDays    Int?     // null = "per law" / case by case
+  entitlementLabel          String   // e.g. "18 days", "12 weeks", "Case by case"
+  requiresCertificateAfterDays Int?  // sick leave certificate threshold
+  carryForwardMaxDays       Int      @default(0)
+  carryForwardExpiry        String?  // e.g. "30 Jun"
+  appliesTo                 AppliesTo @default(ALL)
+  rule                      String   // human-readable rule text
+  requiresDocument          Boolean  @default(false)
+  isPaid                    Boolean  @default(true)
+  requiresAdminApproval     Boolean  @default(false)
+  isActive                  Boolean  @default(true)
+  sortOrder                 Int      @default(0)
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  leaveRequests LeaveRequest[]
+  balances      LeaveBalance[]
+}
+
+model DocumentType {
+  id                    String   @id @default(cuid())
+  name                  String   @unique
+  category              String   // e.g. "Compliance", "Employment", "Academic"
+  hasExpiry             Boolean  @default(false)
+  mandatoryForOperational Boolean @default(false)
+  isSensitive           Boolean  @default(false)
+  blocksRosterIfExpired Boolean  @default(false)
+  isActive              Boolean  @default(true)
+  sortOrder             Int      @default(0)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  documents EmployeeDocument[]
+}
+
+model TrainingProgramme {
+  id                String   @id @default(cuid())
+  name              String   @unique
+  category          String   // "Mandatory · Operations", "Development", ...
+  isMandatory       Boolean  @default(false)
+  appliesTo         AppliesTo @default(ALL)
+  cycleMonths       Int?     // null = optional / one-off
+  provider          String?
+  blocksRostering   Boolean  @default(false) // lapse => not rosterable
+  isActive          Boolean  @default(true)
+  sortOrder         Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  records  TrainingRecord[]
+  sessions TrainingSession[]
+}
+
+model RequestType {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slaDays   Int
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  requests HrRequest[]
+}
+
+model ContractReminderRule {
+  id          String       @id @default(cuid())
+  kind        ReminderKind
+  offsetDays  Int          // days before the event
+  notifyRoles Role[]
+  action      String       // what happens
+  escalate    Boolean      @default(false)
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([kind, offsetDays])
+}
+
+model MedicalScheme {
+  id                  String   @id @default(cuid())
+  name                String   @unique
+  employeeContribPct  Float
+  employerContribPct  Float
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  enrollments MedicalEnrollment[]
+}
+
+// Global key/value configuration (driver cover floor, etc.)
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  valueType   String   @default("string") // string | number | boolean | json
+  label       String
+  description String?
+  category    String   @default("General")
+  updatedAt   DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Employee master record
+// ---------------------------------------------------------------------------
+
+model Employee {
+  id            String   @id @default(cuid())
+  employeeCode  String   @unique // e.g. PTS-0042
+  firstName     String
+  lastName      String
+  fullName      String
+  initials      String
+  avatarUrl     String?
+  gender        String?  // for gender-scoped leave types
+  dateOfBirth   DateTime?
+  nationalId    String?
+  nationality   String?  @default("Rwandan")
+  phone         String?
+  address       String?
+  workLocation  String?
+
+  department     Department    @relation(fields: [departmentId], references: [id])
+  departmentId   String
+  position       Position      @relation(fields: [positionId], references: [id])
+  positionId     String
+  employmentType EmploymentType @relation(fields: [employmentTypeId], references: [id])
+  employmentTypeId String
+  status         EmployeeStatus @relation(fields: [statusId], references: [id])
+  statusId       String
+  isOperational  Boolean       @default(false)
+
+  directManager   Employee?  @relation("DirectReports", fields: [directManagerId], references: [id])
+  directManagerId String?
+  directReports   Employee[] @relation("DirectReports")
+  operationalSupervisor String?
+
+  hireDate        DateTime
+  terminationDate DateTime?
+  terminationReason String?
+
+  emergencyContactName     String?
+  emergencyContactPhone    String?
+  emergencyContactRelation String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user             User?
+  compensation     Compensation?
+  allowances       Allowance[]
+  dependents       Dependent[]
+  nextOfKin        NextOfKin[]
+  medicalEnrollment MedicalEnrollment?
+  contracts        Contract[]
+  documents        EmployeeDocument[]
+  leaveRequests    LeaveRequest[]
+  leaveBalances    LeaveBalance[]
+  attendance       Attendance[]
+  shiftAssignments ShiftAssignment[]
+  trainingRecords  TrainingRecord[]
+  hrRequests       HrRequest[]
+  payrollInputs    PayrollInput[]
+  onboardingTasks  OnboardingTask[]
+  rosterEligibility RosterEligibility?
+
+  @@index([departmentId])
+  @@index([statusId])
+  @@index([isOperational])
+  @@index([directManagerId])
+}
+
+// Restricted: only HR_ADMINISTRATOR (and Finance-scoped reads) may query this.
+model Compensation {
+  id            String   @id @default(cuid())
+  employee      Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId    String   @unique
+  basicSalary   Decimal  @db.Decimal(14, 2)
+  currency      String   @default("RWF")
+  grade         String?
+  effectiveFrom DateTime?
+  lastRevision  String?
+  payrollStatus String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Allowance {
+  id         String   @id @default(cuid())
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String
+  name       String
+  amount     Decimal  @db.Decimal(14, 2)
+  currency   String   @default("RWF")
+  recurring  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([employeeId])
+}
+
+model Dependent {
+  id         String   @id @default(cuid())
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String
+  name       String
+  relation   String
+  dateOfBirth DateTime?
+  memberId   String?
+  status     String   @default("Active")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([employeeId])
+}
+
+model NextOfKin {
+  id         String   @id @default(cuid())
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String
+  name       String
+  relation   String
+  phone      String?
+  note       String?
+  isPrimary  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([employeeId])
+}
+
+model MedicalEnrollment {
+  id             String   @id @default(cuid())
+  employee       Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId     String   @unique
+  scheme         MedicalScheme @relation(fields: [schemeId], references: [id])
+  schemeId       String
+  memberNumber   String?
+  coverDescription String?
+  cardIssued     String?
+  cardValidTo    String?
+  enrolledSince  String?
+  topUp          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Contracts & documents
+// ---------------------------------------------------------------------------
+
+model Contract {
+  id                String   @id @default(cuid())
+  employee          Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId        String
+  kind              ContractKind
+  startDate         DateTime
+  endDate           DateTime? // null = open-ended
+  probationEndDate  DateTime?
+  version           Int      @default(1)
+  signedCopyOnFile  Boolean  @default(false)
+  isActive          Boolean  @default(true)
+  documentId        String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([endDate])
+}
+
+model EmployeeDocument {
+  id             String   @id @default(cuid())
+  employee       Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId     String
+  documentType   DocumentType @relation(fields: [documentTypeId], references: [id])
+  documentTypeId String
+  fileName       String
+  filePath       String
+  mimeType       String?
+  sizeBytes      Int?
+  issueDate      DateTime?
+  expiryDate     DateTime?
+  version        Int      @default(1)
+  isSensitive    Boolean  @default(false)
+  uploadedById   String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([documentTypeId])
+  @@index([expiryDate])
+}
+
+// ---------------------------------------------------------------------------
+// Hiring & onboarding
+// ---------------------------------------------------------------------------
+
+model Vacancy {
+  id             String   @id @default(cuid())
+  title          String
+  department     Department @relation(fields: [departmentId], references: [id])
+  departmentId   String
+  position       Position? @relation(fields: [positionId], references: [id])
+  positionId     String?
+  numberOfPositions Int    @default(1)
+  isOperational  Boolean  @default(false)
+  stage          VacancyStage @default(JOB_REQUEST)
+  openedAt       DateTime @default(now())
+  closedAt       DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  candidates Candidate[]
+
+  @@index([stage])
+  @@index([departmentId])
+}
+
+model Candidate {
+  id          String   @id @default(cuid())
+  fullName    String
+  initials    String
+  email       String?
+  phone       String?
+  vacancy     Vacancy  @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  vacancyId   String
+  stage       CandidateStage @default(APPLIED)
+  isOperational Boolean @default(false)
+  notes       String?
+  rating      Int?
+  appliedAt   DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  interviews  Interview[]
+  gateChecks  DriverGateCheck[]
+  offer       Offer?
+
+  @@index([vacancyId])
+  @@index([stage])
+}
+
+model Interview {
+  id          String   @id @default(cuid())
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  candidateId String
+  type        String   // "Panel", "Road test", "Screening"
+  scheduledAt DateTime
+  panel       String?
+  outcome     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([candidateId])
+}
+
+// The five-check driver hiring gate. No offer for an operational candidate
+// until all five are cleared. Enforced in the service layer.
+model DriverGateCheck {
+  id          String   @id @default(cuid())
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  candidateId String
+  checkKey    DriverGateKey
+  cleared     Boolean  @default(false)
+  clearedAt   DateTime?
+  clearedById String?
+  note        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([candidateId, checkKey])
+}
+
+model Offer {
+  id          String   @id @default(cuid())
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  candidateId String   @unique
+  salary      Decimal? @db.Decimal(14, 2)
+  currency    String   @default("RWF")
+  status      OfferStatus @default(DRAFT)
+  issuedAt    DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model OnboardingTask {
+  id          String   @id @default(cuid())
+  employee    Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId  String?
+  candidateId String?
+  name        String
+  isComplete  Boolean  @default(false)
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([employeeId])
+}
+
+// ---------------------------------------------------------------------------
+// Leave, attendance, schedules
+// ---------------------------------------------------------------------------
+
+model LeaveRequest {
+  id            String   @id @default(cuid())
+  reference     String   @unique // LV-2026-0311
+  employee      Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId    String
+  leaveType     LeaveType @relation(fields: [leaveTypeId], references: [id])
+  leaveTypeId   String
+  startDate     DateTime
+  endDate       DateTime
+  days          Int
+  reason        String
+  stage         LeaveStage @default(EMPLOYEE_REQUEST)
+  coverNote     String?
+  documentId    String?
+  supervisorDecisionById String?
+  supervisorDecisionAt   DateTime?
+  supervisorComment      String?
+  hrDecisionById         String?
+  hrDecisionAt           DateTime?
+  hrComment              String?
+  filedAt       DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([stage])
+}
+
+model LeaveBalance {
+  id            String   @id @default(cuid())
+  employee      Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId    String
+  leaveType     LeaveType @relation(fields: [leaveTypeId], references: [id])
+  leaveTypeId   String
+  year          Int
+  entitlement   Int
+  taken         Int      @default(0)
+  pending       Int      @default(0)
+  carriedForward Int     @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([employeeId, leaveTypeId, year])
+  @@index([employeeId])
+}
+
+model Shift {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  startTime String   // "07:00"
+  endTime   String   // "19:00"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assignments ShiftAssignment[]
+}
+
+model ShiftAssignment {
+  id         String   @id @default(cuid())
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String
+  shift      Shift    @relation(fields: [shiftId], references: [id])
+  shiftId    String
+  date       DateTime
+  createdAt  DateTime @default(now())
+
+  @@unique([employeeId, date])
+  @@index([date])
+}
+
+model Attendance {
+  id         String   @id @default(cuid())
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String
+  date       DateTime
+  status     AttendanceStatus
+  checkIn    String?
+  checkOut   String?
+  note       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([employeeId, date])
+  @@index([date])
+}
+
+// ---------------------------------------------------------------------------
+// Training, certifications, compliance
+// ---------------------------------------------------------------------------
+
+model TrainingSession {
+  id          String   @id @default(cuid())
+  programme   TrainingProgramme @relation(fields: [programmeId], references: [id])
+  programmeId String
+  date        DateTime
+  location    String?
+  capacity    Int?
+  booked      Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([programmeId])
+  @@index([date])
+}
+
+model TrainingRecord {
+  id          String   @id @default(cuid())
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId  String
+  programme   TrainingProgramme @relation(fields: [programmeId], references: [id])
+  programmeId String
+  completedAt DateTime?
+  expiresAt   DateTime?
+  state       TrainingRecordState @default(NOT_STARTED)
+  sessionId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([employeeId, programmeId])
+  @@index([employeeId])
+  @@index([expiresAt])
+}
+
+// Derived compliance flag: is this employee legally rosterable?
+model RosterEligibility {
+  id          String   @id @default(cuid())
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId  String   @unique
+  isRosterable Boolean @default(true)
+  reasons     String[] // e.g. ["Defensive driving expired 12 Aug", "Licence expired"]
+  lastEvaluatedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// HR requests
+// ---------------------------------------------------------------------------
+
+model HrRequest {
+  id          String   @id @default(cuid())
+  reference   String   @unique // HR-2026-0442
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId  String
+  requestType RequestType @relation(fields: [requestTypeId], references: [id])
+  requestTypeId String
+  category    String
+  detail      String
+  priority    RequestPriority @default(NORMAL)
+  status      RequestStatus   @default(IN_PROGRESS)
+  owner       User?    @relation("RequestOwner", fields: [ownerId], references: [id])
+  ownerId     String?
+  slaDays     Int
+  raisedAt    DateTime @default(now())
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Payroll inputs (HR input layer — not a payroll engine)
+// ---------------------------------------------------------------------------
+
+model PayrollPeriod {
+  id         String   @id @default(cuid())
+  month      Int
+  year       Int
+  status     PayrollPeriodStatus @default(OPEN)
+  cutoffDate DateTime
+  lockedAt   DateTime?
+  lockedById String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  inputs PayrollInput[]
+
+  @@unique([month, year])
+}
+
+model PayrollInput {
+  id          String   @id @default(cuid())
+  period      PayrollPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  periodId    String
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId  String
+  item        String   // "Night airport allowance"
+  amount      Decimal  @db.Decimal(14, 2)
+  currency    String   @default("RWF")
+  isDeduction Boolean  @default(false)
+  isValueChange Boolean @default(true)
+  basis       String
+  state       PayrollInputState @default(PENDING_HR)
+  sourceRef   String?  // links to leave/request/contract record
+  approvedById String?
+  approvedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([periodId])
+  @@index([employeeId])
+  @@index([state])
+}
+
+// ---------------------------------------------------------------------------
+// Notifications
+// ---------------------------------------------------------------------------
+
+model Notification {
+  id         String   @id @default(cuid())
+  channel    NotificationChannel
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String?
+  title      String
+  body       String
+  entityType String?
+  entityId   String?
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([channel])
+  @@index([isRead])
+}

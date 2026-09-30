@@ -1,47 +1,25 @@
 {
-  "name": "copy-of-hrms-dashboard",
+  "name": "pts-hrms",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "description": "PTS.rw HR Management System — transport & tourism workforce HR platform",
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ],
   "scripts": {
-    "dev": "vite",
-    "server": "tsx backend/src/server.ts",
-    "dev:all": "concurrently \"npm run server\" \"npm run dev\"",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@google/genai": "^0.14.0",
-    "@types/react-big-calendar": "^1.16.3",
-    "axios": "^1.13.2",
-    "bcryptjs": "^3.0.3",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
-    "jspdf": "^3.0.4",
-    "jspdf-autotable": "^5.0.2",
-    "moment": "^2.30.1",
-    "nodemailer": "^7.0.11",
-    "qrcode": "^1.5.4",
-    "react": "^19.2.0",
-    "react-big-calendar": "^1.19.4",
-    "react-dom": "^19.2.0",
-    "recharts": "^3.5.1",
-    "speakeasy": "^2.0.0",
-    "sqlite3": "^5.1.7",
-    "xlsx": "^0.18.5"
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev -w @pts/api\" \"npm run dev -w @pts/web\"",
+    "build": "npm run build -w @pts/api && npm run build -w @pts/web",
+    "db:migrate": "npm run db:migrate -w @pts/api",
+    "db:seed": "npm run db:seed -w @pts/api",
+    "db:reset": "npm run db:reset -w @pts/api",
+    "test": "npm run test -w @pts/api",
+    "lint": "npm run lint -w @pts/api && npm run lint -w @pts/web"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.2.1",
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "autoprefixer": "^10.4.27",
-    "concurrently": "^9.2.1",
-    "postcss": "^8.5.8",
-    "tailwindcss": "^4.2.1",
-    "tsx": "^4.21.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
